@@ -36,7 +36,8 @@ config :phoenix, :json_library, Jason
 # Setup user repo for Pow
 config :auther, :pow,
        user: Auther.Users.User,
-       repo: Auther.Repo
+       repo: Auther.Repo,
+       web_module: AutherWeb
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
