@@ -32,3 +32,4 @@
   </div>
 <% end %>
 
+<span><%= link "Log out", to: Routes.pow_session_path(@conn, :delete), method: :delete %></span>

@@ -10,6 +10,11 @@ defmodule AutherWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :protected do
+    plug Pow.Plug.RequireAuthenticated,
+         error_handler: Pow.Phoenix.PlugErrorHandler
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -17,7 +22,12 @@ defmodule AutherWeb.Router do
   scope "/" do
     pipe_through :browser
 
-    pow_routes()
+    pow_session_routes()
+  end
+
+  scope "/", Pow.Phoenix, as: "pow" do
+    pipe_through [:browser, :protected]
+    resources "/registration", RegistrationController, singleton: true, only: [:edit, :update, :delete]
   end
 
   scope "/", AutherWeb do
