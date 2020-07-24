@@ -1,5 +1,22 @@
 # Auther
 
+An OAuth 2.0 compliant authentication service for CodeIsland.org
+
+## Features
+
+* Secure Login via Username/Password and 2FA
+* Group based access to Services and specific Service features (via Scopes)
+    * Example: Access to the Blog could be for the Group "Copy Editor" which is only save drafts but not publish articles
+* Reset my Password functionality
+* (TBD) Login via 3rd Party Providers (Discord, etz)
+
+## Configuration
+
+* Rather than adding web interfaces for adding applications or scopes, these are configured in the application
+* They are parses at compile time for quick runtime lookup
+
+# Development
+
 To start your Phoenix server:
 
   * Setup the project with `mix setup`
