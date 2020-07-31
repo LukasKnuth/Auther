@@ -16,14 +16,7 @@ config :auther, AutherWeb.Endpoint,
   secret_key_base: "spVH5vYznV2B8v/mJH9doXytygmX9UlDxap2qoLJ2sZTRyhUGazd1dV9OJIa1oRQ",
   render_errors: [view: AutherWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Auther.PubSub,
-  live_view: [signing_salt: "HKJaI6vV"],
-  http: [
-    protocol_options: [
-      # The following seems to be required in order to stop errors like "413 couldn't parse headers, too long"
-      max_request_line_length: 8192,
-      max_header_value_length: 8192
-    ]
-  ]
+  live_view: [signing_salt: "HKJaI6vV"]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -35,9 +28,9 @@ config :phoenix, :json_library, Jason
 
 # Setup user repo for Pow
 config :auther, :pow,
-       user: Auther.Users.User,
-       repo: Auther.Repo,
-       web_module: AutherWeb
+  user: Auther.Users.User,
+  repo: Auther.Repo,
+  web_module: AutherWeb
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
