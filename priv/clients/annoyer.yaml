@@ -1,0 +1,6 @@
+client:
+  - name: Annoyer
+    url: https://annyoer.codeisland.org
+    id: annoyer
+    scopes:
+      - push_mobile

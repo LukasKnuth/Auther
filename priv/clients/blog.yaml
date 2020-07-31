@@ -1,0 +1,15 @@
+client:
+  - name: Blog CMS
+    url: https://codeisland.org
+    id: blog
+    scopes:
+      - publish_article
+      - publish_inline
+      - publish_single
+      - draft_article
+      - draft_inline
+      - draft_single
+      - change_global
+      - access_tools
+    policies:
+      require_mfa: true
