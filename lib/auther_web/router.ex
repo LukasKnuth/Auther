@@ -12,7 +12,7 @@ defmodule AutherWeb.Router do
 
   pipeline :protected do
     plug Pow.Plug.RequireAuthenticated,
-         error_handler: Pow.Phoenix.PlugErrorHandler
+      error_handler: Pow.Phoenix.PlugErrorHandler
   end
 
   pipeline :api do
@@ -27,7 +27,12 @@ defmodule AutherWeb.Router do
 
   scope "/", Pow.Phoenix, as: "pow" do
     pipe_through [:browser, :protected]
-    resources "/registration", RegistrationController, singleton: true, only: [:edit, :update, :delete]
+
+    resources "/registration", RegistrationController,
+      singleton: true,
+      only: [:edit, :update, :delete]
+
+    get "/authorize", AutherWeb.OAuthController, :authorize
   end
 
   scope "/", AutherWeb do
@@ -35,11 +40,6 @@ defmodule AutherWeb.Router do
 
     get "/", PageController, :index
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", AutherWeb do
-  #   pipe_through :api
-  # end
 
   # Enables LiveDashboard only for development
   #

@@ -1,10 +1,8 @@
 defmodule Auther.OAuth.Client.Parser do
-
   alias Auther.OAuth.Client
 
-  @spec parse!() :: %{String.t => %Client{}}
+  @spec parse!() :: %{String.t() => %Client{}}
   def parse!() do
-
     base_path = Path.join([:code.priv_dir(:auther), "clients"])
 
     base_path
@@ -41,5 +39,4 @@ defmodule Auther.OAuth.Client.Parser do
   end
 
   defp parse_client!(yaml, _lookup), do: raise(CompileError, "YAML entry is invalid!")
-
 end
