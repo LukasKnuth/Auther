@@ -1,7 +1,7 @@
 defmodule Auther.Users.Group do
   use Ecto.Schema
 
-  alias Auther.Users.User
+  alias Auther.Users.{User, UserGroup}
   alias Ecto.Changeset
 
   @type t :: %__MODULE__{
@@ -16,7 +16,7 @@ defmodule Auther.Users.Group do
     field :description, :string
     field :scopes, {:array, :string}
 
-    many_to_many :users, User, join_through: "users_groups"
+    many_to_many :users, User, join_through: UserGroup
 
     timestamps()
   end

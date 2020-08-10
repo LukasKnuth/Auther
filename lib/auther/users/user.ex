@@ -3,20 +3,20 @@ defmodule Auther.Users.User do
   use Pow.Ecto.Schema
 
   alias Ecto.Changeset
-  alias Auther.Users.Group
+  alias Auther.Users.{Group, UserGroup}
 
   @type t :: %__MODULE__{
           id: integer,
           email: String.t(),
           display_name: String.t(),
-          groups: list(String.t())
+          groups: list(Group.t())
         }
 
   schema "users" do
     pow_user_fields()
     field :display_name, :string
 
-    many_to_many :groups, Group, join_through: "users_groups"
+    many_to_many :groups, Group, join_through: UserGroup
 
     timestamps()
   end
