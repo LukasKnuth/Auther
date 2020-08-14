@@ -9,6 +9,8 @@ defmodule Auther.Application do
     children = [
       # Start the Ecto repository
       Auther.Repo,
+      # Start the Registry for 2-step OAuth
+      Auther.OAuth.Store.Registry,
       # Start the Telemetry supervisor
       AutherWeb.Telemetry,
       # Start the PubSub system
