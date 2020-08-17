@@ -23,11 +23,10 @@ defmodule Auther.OAuth.Store.RegistryTest do
 
   test "data is auto removed on expiry" do
     key = "test1"
-    Registry.insert(key, :something)
+    {:ok, pid} = Registry.insert(key, :something)
 
-    # todo send expiry message explicitly to GenServer
+    send(pid, :expired)
 
-    # assert_receive
-    # Process.monitor
+    assert {:error, :entry_not_found} = Registry.fetch(key)
   end
 end

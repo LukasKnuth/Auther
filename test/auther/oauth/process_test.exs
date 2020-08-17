@@ -2,7 +2,6 @@ defmodule Auther.OAuth.ProcessTest do
   use Auther.DataCase
 
   alias Auther.Users
-  alias Auther.Users.{Group}
   alias Auther.OAuth.{Process}
 
   describe "#auth_request/6" do

@@ -31,14 +31,13 @@ defmodule Auther.OAuth.Store.Registry do
 
   @spec fetch(key :: String.t()) :: {:ok, any} | {:error, :entry_not_found}
   def fetch(key) do
-    res =
-      with [{pid, _val}] <- Registry.lookup(@registry_name, key),
-           true <- Process.alive?(pid),
-           do: {:ok, Entry.get(pid)}
-
-    case res do
-      {:ok, _} = res -> res
-      _ -> {:error, :entry_not_found}
+    try do
+      case Registry.lookup(@registry_name, key) do
+        [{pid, _val}] -> {:ok, Entry.get(pid)}
+        _ -> {:error, :entry_not_found}
+      end
+    catch
+      :exit, _ -> {:error, :entry_not_found}
     end
   end
 end
