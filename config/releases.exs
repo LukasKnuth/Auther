@@ -30,6 +30,12 @@ config :auther, AutherWeb.Endpoint,
   ],
   secret_key_base: secret_key_base
 
+config :joken,
+  jwt_token: [
+    singer_alg: "ES256",
+    key_pem: System.get_env("JWT_PRIVATE_PEM")
+  ]
+
 # ## Using releases (Elixir v1.9+)
 #
 # If you are doing OTP releases, you need to instruct Phoenix

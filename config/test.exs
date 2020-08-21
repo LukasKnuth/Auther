@@ -20,3 +20,16 @@ config :auther, AutherWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :joken,
+ current_time_adapter: Auther.Mock.JwtTokenTime,
+  jwt_token: [
+    signer_alg: "ES256", # todo possible to not re-define this here but merge it in from basic config?
+    key_pem: """
+    -----BEGIN EC PRIVATE KEY-----
+    MHYCAQEEHz3Mo9EeR361N+38ztxNpYBbZpASxep/NQezNkxQotGgCgYIKoZIzj0D
+    AQehRANCAARXKWDrCdqT7bHZq+zozi1eMeDGoQv6QgKy2XvetVcg045MJ3MUG6Nv
+    zzmsVe/xBK0wIQcyXo+Z63FXptepILZL
+    -----END EC PRIVATE KEY-----
+    """
+  ]

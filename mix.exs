@@ -46,7 +46,8 @@ defmodule Auther.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:pow, "~> 1.0.20"},
-      {:yaml_elixir, "~> 2.5"}
+      {:yaml_elixir, "~> 2.5"},
+      {:joken, "~> 2.0"}
     ]
   end
 
