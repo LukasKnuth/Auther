@@ -35,3 +35,6 @@ npm-debug.log
 
 # IntelliJ Stuff
 .idea/
+
+# DirEnv configuration
+.envrc
