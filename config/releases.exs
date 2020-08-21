@@ -33,7 +33,7 @@ config :auther, AutherWeb.Endpoint,
 config :joken,
   jwt_token: [
     singer_alg: "ES256",
-    key_pem: System.get_env("JWT_PRIVATE_PEM")
+    key_pem: System.fetch_env!("JWT_PRIVATE_PEM")
   ]
 
 # ## Using releases (Elixir v1.9+)

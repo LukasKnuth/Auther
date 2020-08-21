@@ -74,3 +74,10 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Configure Joken. NOTE: Reads env-variable AT COMPILE TIME
+config :joken,
+  jwt_token: [
+    singer_alg: "ES256",
+    key_pem: System.fetch_env!("JWT_PRIVATE_PEM")
+  ]
