@@ -24,6 +24,7 @@ defmodule Auther.JWT.TokenTest do
       {:ok, token, _claims} = Token.for_user_client(user, client)
 
       subject = user.id
+
       {:ok, %{"iss" => "Auther", "aud" => "https://codeisland.org", "sub" => ^subject}} =
         Token.verify_and_validate(token)
     end
@@ -31,9 +32,12 @@ defmodule Auther.JWT.TokenTest do
     test "the issued token expires after 2 minutes", %{user: user, client: client} do
       {:ok, token, _claims} = Token.for_user_client(user, client)
 
-      issued_at = 719871000
-      expiry = issued_at + (2 * 60 * 60) # 2min in seconds
-      {:ok, %{"iat" => ^issued_at, "nbf" => ^issued_at, "exp" => ^expiry}} = Token.verify_and_validate(token)
+      issued_at = 719_871_000
+      # 2min in seconds
+      expiry = issued_at + 2 * 60 * 60
+
+      {:ok, %{"iat" => ^issued_at, "nbf" => ^issued_at, "exp" => ^expiry}} =
+        Token.verify_and_validate(token)
     end
   end
 end
