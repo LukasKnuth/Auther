@@ -38,5 +38,5 @@ defmodule Auther.OAuth.Client.Parser do
     |> Map.put(id, %Client{client_id: id, name: name, url: url})
   end
 
-  defp parse_client!(yaml, _lookup), do: raise(CompileError, "YAML entry is invalid!")
+  defp parse_client!(_yaml, _lookup), do: raise(CompileError, "YAML entry is invalid!")
 end
