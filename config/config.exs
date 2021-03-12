@@ -7,6 +7,9 @@
 # General application configuration
 use Mix.Config
 
+# Knigge config
+config :auther, Auther.Crypto.Password, Auther.Crypto.Password.Bcrypt
+
 config :auther,
   ecto_repos: [Auther.Repo]
 
@@ -25,6 +28,9 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# Set bcrypt rounds for secure passwords
+config :bcrypt_elixir, log_rounds: 12
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

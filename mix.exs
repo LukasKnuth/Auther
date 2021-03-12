@@ -44,7 +44,14 @@ defmodule Auther.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+
+      # Password hash
+      {:bcrypt_elixir, "~> 2.0"},
+
+      # Automate mock creation for testing
+      {:mox, "~> 1.0", only: :test},
+      {:knigge, "~> 1.3"}
     ]
   end
 

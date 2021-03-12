@@ -1,5 +1,8 @@
 use Mix.Config
 
+# Knigge config
+config :auther, Auther.Crypto.Password, Auther.Crypto.Password.Mock
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
@@ -20,3 +23,6 @@ config :auther, AutherWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+# TEST ONLY: reduce bcrypt rounds to speed up test-execution
+config :bcrypt_elixir, :log_rounds, 4
