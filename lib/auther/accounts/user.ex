@@ -2,7 +2,7 @@ defmodule Auther.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Auther.Crypto.Password
+  alias Auther.Security.Password
 
   schema "users" do
     field :email, :string

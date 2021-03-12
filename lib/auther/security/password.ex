@@ -1,4 +1,4 @@
-defmodule Auther.Crypto.Password do
+defmodule Auther.Security.Password do
   use Knigge, otp_app: :auther
 
   alias Auther.Accounts.User

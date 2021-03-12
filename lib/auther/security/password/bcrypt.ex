@@ -1,5 +1,5 @@
-defmodule Auther.Crypto.Password.Bcrypt do
-  @behaviour Auther.Crypto.Password
+defmodule Auther.Security.Password.Bcrypt do
+  @behaviour Auther.Security.Password
 
   alias Auther.Accounts.User
 

@@ -5,7 +5,7 @@ defmodule Auther.AccountsTest do
 
   alias Auther.Accounts
   alias Auther.Accounts.User
-  alias Auther.Crypto.Password.Mock, as: MockPassword
+  alias Auther.Security.Password.Mock, as: MockPassword
 
   @pw_hash "$2b$12$rMFYMFy91qV6KTPclubTVOL9gpO55.JRWDRlaZccqsdbIXZA6O8Gi"
   @valid_attrs %{email: "some email", name: "some name", password: "asdf1234", password_confirmation: "asdf1234"}

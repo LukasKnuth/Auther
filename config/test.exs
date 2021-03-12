@@ -1,7 +1,7 @@
 use Mix.Config
 
 # Knigge config
-config :auther, Auther.Crypto.Password, Auther.Crypto.Password.Mock
+config :auther, Auther.Security.Password, Auther.Security.Password.Mock
 
 # Configure your database
 #
