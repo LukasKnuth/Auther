@@ -49,6 +49,9 @@ defmodule Auther.MixProject do
       # Password hash
       {:bcrypt_elixir, "~> 2.0"},
 
+      # 2FA Time-Based One-Time Password
+      {:nimble_totp, "~> 0.1.1"},
+
       # Automate mock creation for testing
       {:mox, "~> 1.0", only: :test},
       {:knigge, "~> 1.3"}

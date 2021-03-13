@@ -9,6 +9,7 @@ use Mix.Config
 
 # Knigge config
 config :auther, Auther.Security.Password, Auther.Security.Password.Bcrypt
+config :auther, Auther.Security.TwoFactorAuth, Auther.Security.TwoFactorAuth.TOTP
 
 config :auther,
   ecto_repos: [Auther.Repo]
