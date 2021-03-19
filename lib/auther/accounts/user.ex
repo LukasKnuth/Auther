@@ -2,6 +2,7 @@ defmodule Auther.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Auther.Accounts.TwoFactorAuth
   alias Auther.Security.Password
 
   schema "users" do
@@ -10,6 +11,8 @@ defmodule Auther.Accounts.User do
 
     field :password, :string, virtual: true
     field :password_hash, :string
+
+    has_one :two_factor_auth, TwoFactorAuth, on_replace: :delete
 
     timestamps()
   end
@@ -26,6 +29,18 @@ defmodule Auther.Accounts.User do
     user
     |> cast(attrs, [:name, :email])
     |> validate_required([:name, :email])
+  end
+
+  def changeset_for_enable_2fa(user, tfa_attrs) do
+    user
+    |> cast(%{two_factor_auth: tfa_attrs}, [])
+    |> cast_assoc(:two_factor_auth, with: &TwoFactorAuth.changeset/2, required: true)
+  end
+
+  def changeset_for_disable_2fa(user) do
+    user
+    |> cast(%{two_factor_auth: nil}, [])
+    |> cast_assoc(:two_factor_auth, with: &TwoFactorAuth.changeset/2)
   end
 
   def changeset_for_password_change(user, attrs) do

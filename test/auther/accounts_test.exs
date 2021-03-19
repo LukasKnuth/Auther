@@ -4,7 +4,7 @@ defmodule Auther.AccountsTest do
   import Mox
 
   alias Auther.Accounts
-  alias Auther.Accounts.User
+  alias Auther.Accounts.{TwoFactorAuth, User}
   alias Auther.Security.Password.Mock, as: MockPassword
 
   @pw_hash "$2b$12$rMFYMFy91qV6KTPclubTVOL9gpO55.JRWDRlaZccqsdbIXZA6O8Gi"
@@ -103,6 +103,53 @@ defmodule Auther.AccountsTest do
       assert {:ok, %User{}} = Accounts.delete_user(user)
       assert_raise Ecto.NoResultsError, fn -> Accounts.get_user!(user.id) end
     end
+
+    test "deletes user and 2FA config" do
+      user = user_fixture()
+      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{id: tfa_id}} = user} =
+        Accounts.enable_2fa(user, "secret", ["fallback1", "fallback2"])
+
+      assert {:ok, %User{}} = Accounts.delete_user(user)
+      assert_raise Ecto.NoResultsError, fn -> Accounts.get_user!(user.id) end
+      assert_raise Ecto.NoResultsError, fn -> Repo.get!(TwoFactorAuth, tfa_id) end
+    end
+  end
+
+  describe "enable_2fa/3" do
+    test "creates and assosiates a valid 2FA config" do
+      user = user_fixture()
+
+      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{}} = user} =
+               Accounts.enable_2fa(user, "secret", ["fallback1", "fallback2"])
+
+      assert user.two_factor_auth.secret == "secret"
+      assert user.two_factor_auth.fallback == ["fallback1", "fallback2"]
+    end
+
+    test "fails if no fallback keys are provided" do
+      user = user_fixture()
+      assert {:error, %Ecto.Changeset{}} = Accounts.enable_2fa(user, "secret", [])
+      assert user.two_factor_auth == nil
+    end
+  end
+
+  describe "disable_2fa/1" do
+    test "does nothing if no 2FA config is present" do
+      user = user_fixture()
+
+      assert {:ok, ^user} = Accounts.disable_2fa(user)
+    end
+
+    test "deletes 2FA config if present" do
+      user = user_fixture()
+
+      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{id: tfa_id}} = user} =
+               Accounts.enable_2fa(user, "secret", ["fallback"])
+
+      assert {:ok, user} = Accounts.disable_2fa(user)
+      assert user.two_factor_auth == nil
+      assert Repo.get(TwoFactorAuth, tfa_id) == nil
+    end
   end
 
   defp user_fixture(attrs \\ %{}) do
@@ -110,6 +157,10 @@ defmodule Auther.AccountsTest do
       attrs
       |> Enum.into(@valid_attrs)
       |> Accounts.create_user()
+      |> case do
+        {:ok, user} -> {:ok, Auther.Repo.preload(user, :two_factor_auth)}
+        {:error, _} = err -> err
+      end
 
     user
   end

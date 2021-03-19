@@ -8,7 +8,11 @@ defmodule Auther.Accounts do
 
   alias Auther.Accounts.User
 
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id) do
+    User
+    |> Repo.get!(id)
+    |> Repo.preload(:two_factor_auth)
+  end
 
   def create_user(attrs \\ %{}) do
     %User{}
@@ -30,5 +34,20 @@ defmodule Auther.Accounts do
 
   def delete_user(%User{} = user) do
     Repo.delete(user)
+  end
+
+  @spec enable_2fa(%User{}, String.t(), [String.t()]) :: User.t()
+  def enable_2fa(%User{} = user, secret, fallbacks) do
+    user
+    |> Repo.preload(:two_factor_auth)
+    |> User.changeset_for_enable_2fa(%{secret: secret, fallback: fallbacks})
+    |> Repo.update()
+  end
+
+  def disable_2fa(%User{} = user) do
+    user
+    |> Repo.preload(:two_factor_auth)
+    |> User.changeset_for_disable_2fa()
+    |> Repo.update()
   end
 end
