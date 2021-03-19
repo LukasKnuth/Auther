@@ -8,7 +8,12 @@ defmodule Auther.AccountsTest do
   alias Auther.Security.Password.Mock, as: MockPassword
 
   @pw_hash "$2b$12$rMFYMFy91qV6KTPclubTVOL9gpO55.JRWDRlaZccqsdbIXZA6O8Gi"
-  @valid_attrs %{email: "some email", name: "some name", password: "asdf1234", password_confirmation: "asdf1234"}
+  @valid_attrs %{
+    email: "some email",
+    name: "some name",
+    password: "asdf1234",
+    password_confirmation: "asdf1234"
+  }
   @update_attrs %{email: "some updated email", name: "some updated name"}
   @invalid_attrs %{email: nil, name: nil, password_hash: "anything"}
 
@@ -43,7 +48,8 @@ defmodule Auther.AccountsTest do
       assert {:ok, %User{} = user} = Accounts.update_user(user, @update_attrs)
       assert user.email == "some updated email"
       assert user.name == "some updated name"
-      assert user.password_hash == @pw_hash # unchanged
+      # unchanged
+      assert user.password_hash == @pw_hash
     end
 
     test "with invalid data returns error changeset" do
@@ -68,13 +74,19 @@ defmodule Auther.AccountsTest do
       |> expect(:hash, fn _ -> @test_pw_hash end)
 
       user = user_fixture()
-      assert {:ok, %User{} = user} = Accounts.change_password(user, %{password: "test", password_confirmation: "test"})
+
+      assert {:ok, %User{} = user} =
+               Accounts.change_password(user, %{password: "test", password_confirmation: "test"})
+
       assert user.password_hash == @test_pw_hash
     end
 
     test "with non-matching password and confirm_passowrd returns error changeset" do
       user = user_fixture()
-      assert {:error, %Ecto.Changeset{}} = Accounts.change_password(user, %{password: "test", password_confirmation: "other"})
+
+      assert {:error, %Ecto.Changeset{}} =
+               Accounts.change_password(user, %{password: "test", password_confirmation: "other"})
+
       assert user == Accounts.get_user!(user.id)
     end
 
