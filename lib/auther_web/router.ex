@@ -9,6 +9,10 @@ defmodule AutherWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :auth do
+    plug AutherWeb.AuthPlug
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -17,6 +21,12 @@ defmodule AutherWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+  end
+
+  scope "/account", AutherWeb.Authorized do
+    pipe_through [:browser, :auth]
+
+    get "/", AccountController, :show
   end
 
   # Other scopes may use custom stacks.
