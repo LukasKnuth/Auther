@@ -67,7 +67,7 @@ defmodule AutherWeb.Session do
   def is_signed_in?(conn) do
     case Conn.get_session(conn, @session_key) do
       nil -> false
-      %{user_id: _id} -> true
+      %{user_id: id} when is_integer(id) -> true
     end
   end
 end
