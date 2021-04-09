@@ -10,5 +10,5 @@ defmodule Auther.Security.Password do
   @callback hash(password()) :: hashed_password()
 
   @doc "Compare the given plain-text password to the (hashed and salted) password from storage"
-  @callback verify(password(), hashed_password() | User.t()) :: boolean()
+  @callback verify(hashed_password() | User.t(), password()) :: boolean()
 end

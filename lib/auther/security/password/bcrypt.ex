@@ -7,7 +7,7 @@ defmodule Auther.Security.Password.Bcrypt do
   def hash(password), do: Bcrypt.hash_pwd_salt(password)
 
   @impl true
-  def verify(given, %User{password_hash: stored}), do: verify(given, stored)
+  def verify(%User{password_hash: stored}, given), do: verify(stored, given)
 
-  def verify(given, stored) when is_bitstring(stored), do: Bcrypt.verify_pass(given, stored)
+  def verify(stored, given) when is_bitstring(stored), do: Bcrypt.verify_pass(given, stored)
 end
