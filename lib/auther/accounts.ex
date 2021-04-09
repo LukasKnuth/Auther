@@ -11,13 +11,13 @@ defmodule Auther.Accounts do
   def get_user!(id) do
     User
     |> Repo.get!(id)
-    |> Repo.preload(:two_factor_auth)
+    |> user_preload()
   end
 
   def get_user_by(clauses) do
     case Repo.get_by(User, clauses) do
       nil -> :error
-      %User{} = user -> {:ok, Repo.preload(user, :two_factor_auth)}
+      %User{} = user -> {:ok, user_preload(user)}
     end
   end
 
@@ -46,15 +46,17 @@ defmodule Auther.Accounts do
   @spec enable_2fa(%User{}, String.t(), [String.t()]) :: User.t()
   def enable_2fa(%User{} = user, secret, fallbacks) do
     user
-    |> Repo.preload(:two_factor_auth)
+    |> user_preload()
     |> User.changeset_for_enable_2fa(%{secret: secret, fallback: fallbacks})
     |> Repo.update()
   end
 
   def disable_2fa(%User{} = user) do
     user
-    |> Repo.preload(:two_factor_auth)
+    |> user_preload()
     |> User.changeset_for_disable_2fa()
     |> Repo.update()
   end
+
+  defp user_preload(%User{} = user), do: Repo.preload(user, :two_factor_auth)
 end
