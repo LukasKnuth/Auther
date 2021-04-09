@@ -107,12 +107,6 @@ defmodule AutherWeb.SessionTest do
     end
   end
 
-  defp session_conn do
-    build_conn()
-    |> bypass_through(AutherWeb.Router, :browser)
-    |> get("/")
-  end
-
   defp user_fixture! do
     {:ok, user} = Accounts.create_user(@user_attrs)
     Map.put(user, :two_factor_auth, nil) # pretend like 2FA is preloaded

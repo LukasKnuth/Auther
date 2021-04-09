@@ -27,9 +27,7 @@ defmodule AutherWeb.AuthPlugTest do
   end
 
   defp run_plug_with(user \\ nil) do
-    build_conn()
-    |> bypass_through(AutherWeb.Router, :browser)
-    |> get("/")
+    session_conn()
     |> maybe_put_session(user)
     |> AutherWeb.AuthPlug.call(
       AutherWeb.AuthPlug.init([])

@@ -28,6 +28,10 @@ defmodule AutherWeb.ConnCase do
 
       # The default endpoint for testing
       @endpoint AutherWeb.Endpoint
+
+      def session_conn(session \\ []) do
+        Plug.Test.init_test_session(build_conn(), session)
+      end
     end
   end
 
