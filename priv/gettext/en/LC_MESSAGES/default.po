@@ -1,0 +1,32 @@
+## "msgid"s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove "msgid"s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use "mix gettext.extract --merge" or "mix gettext.merge"
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2\n"
+
+#, elixir-format
+#: lib/auther_web/controllers/session_controller.ex:25
+msgid "Succesfully logged in"
+msgstr ""
+
+#, elixir-format
+#: lib/auther_web/controllers/session_controller.ex:34
+msgid "Succesfully logged out"
+msgstr ""
+
+#, elixir-format
+#: lib/auther_web/controllers/session_controller.ex:18
+msgid "Unknown email/password combination"
+msgstr ""
+
+#, elixir-format
+#: lib/auther_web/templates/page/index.html.eex:2
+msgid "Welcome to %{name}!"
+msgstr ""

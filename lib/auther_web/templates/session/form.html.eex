@@ -1,0 +1,6 @@
+<h1>Login form</h1>
+<%= form_for @conn, Routes.session_path(@conn, :login), fn f -> %>
+  <%= text_input f, :email %>
+  <%= password_input f, :password %>
+  <%= submit "Login" %>
+<% end %>

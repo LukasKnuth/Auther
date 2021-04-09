@@ -23,6 +23,14 @@ defmodule AutherWeb.Router do
     get "/", PageController, :index
   end
 
+  scope "/session", AutherWeb do
+    pipe_through :browser
+
+    get "/new", SessionController, :form
+    post "/login", SessionController, :login
+    get "/logout", SessionController, :logout
+  end
+
   scope "/account", AutherWeb.Authorized do
     pipe_through [:browser, :auth]
 
