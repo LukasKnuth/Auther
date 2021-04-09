@@ -106,8 +106,9 @@ defmodule Auther.AccountsTest do
 
     test "deletes user and 2FA config" do
       user = user_fixture()
+
       assert {:ok, %User{two_factor_auth: %TwoFactorAuth{id: tfa_id}} = user} =
-        Accounts.enable_2fa(user, "secret", ["fallback1", "fallback2"])
+               Accounts.enable_2fa(user, "secret", ["fallback1", "fallback2"])
 
       assert {:ok, %User{}} = Accounts.delete_user(user)
       assert_raise Ecto.NoResultsError, fn -> Accounts.get_user!(user.id) end
