@@ -29,6 +29,19 @@ defmodule Auther.AccountsTest do
     end
   end
 
+  describe "get_user_by/1" do
+    test "returns the user for given clauses" do
+      user_fixture(email: "test@mail.com")
+      assert {:ok, %User{} = user} = Accounts.get_user_by(email: "test@mail.com")
+      assert user.email == "test@mail.com"
+    end
+
+    test "returns :error for unknown clauses" do
+      user_fixture(email: "other@mail.com")
+      assert :error == Accounts.get_user_by(email: "test@mail.com")
+    end
+  end
+
   describe "create_user/1" do
     test "with valid data creates a user" do
       assert {:ok, %User{} = user} = Accounts.create_user(@valid_attrs)

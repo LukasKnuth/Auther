@@ -14,6 +14,13 @@ defmodule Auther.Accounts do
     |> Repo.preload(:two_factor_auth)
   end
 
+  def get_user_by(clauses) do
+    case Repo.get_by(User, clauses) do
+      nil -> :error
+      %User{} = user -> {:ok, Repo.preload(user, :two_factor_auth)}
+    end
+  end
+
   def create_user(attrs \\ %{}) do
     %User{}
     |> User.changeset_for_create(attrs)
