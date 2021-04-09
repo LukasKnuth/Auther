@@ -7,7 +7,8 @@ defmodule AutherWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_auther_key",
-    signing_salt: "6NoNZhuP"
+    signing_salt: "vsCfDnPeUrg3C34krNH9msB!",
+    encrpytion_salt: "EZViUs_npbFwA8Zsec3__*3r"
   ]
 
   socket "/socket", AutherWeb.UserSocket,
