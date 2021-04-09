@@ -28,11 +28,11 @@ defmodule AutherWeb.SessionTest do
     end
 
     test "returns :error if username is found but password doesn't match", %{user: user} do
-      assert {:error, :invalid_combination} = Session.authenticate_user(user.email, "incorrect")
+      assert {:error, :unknown_combination} = Session.authenticate_user(user.email, "incorrect")
     end
 
     test "returns :error if username not found" do
-      assert {:error, :invalid_combination} = Session.authenticate_user("doesnt@exist.com", "irrelevant")
+      assert {:error, :unknown_combination} = Session.authenticate_user("doesnt@exist.com", "irrelevant")
     end
   end
 

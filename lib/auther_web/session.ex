@@ -11,13 +11,13 @@ defmodule AutherWeb.Session do
   @type session :: %{user_id: integer()}
 
   @spec authenticate_user(String.t(), String.t()) ::
-          {:ok, %User{}} | {:error, :invalid_combination}
+          {:ok, %User{}} | {:error, :unknown_combination}
   def authenticate_user(email, password) do
     with {:ok, user} <- Accounts.get_user_by(email: email),
          true <- Password.verify(user, password) do
       {:ok, user}
     else
-      _ -> {:error, :invalid_combination}
+      _ -> {:error, :unknown_combination}
     end
   end
 
