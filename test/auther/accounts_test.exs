@@ -76,9 +76,7 @@ defmodule Auther.AccountsTest do
       assert {:ok, %User{} = changed_user} = Accounts.update_user(user, %{password_hash: "other"})
       assert user == changed_user
     end
-  end
 
-  describe "change_password/2" do
     @test_pw_hash "$2b$12$hAtV1nhmVf/Ij94r/6rGJupCABIcvGK4Yv7hu3bW30KuVCJGdmsOG"
 
     test "with password and confirm_password updates the user" do
@@ -89,23 +87,25 @@ defmodule Auther.AccountsTest do
       user = user_fixture()
 
       assert {:ok, %User{} = user} =
-               Accounts.change_password(user, %{password: "test", password_confirmation: "test"})
+               Accounts.update_user(user, %{password: "test", password_confirmation: "test"})
 
       assert user.password_hash == @test_pw_hash
     end
 
     test "with non-matching password and confirm_passowrd returns error changeset" do
       user = user_fixture()
+      expect(MockPassword, :hash, 0, fn _ -> "not_called_for_update" end)
 
       assert {:error, %Ecto.Changeset{}} =
-               Accounts.change_password(user, %{password: "test", password_confirmation: "other"})
-
+               Accounts.update_user(user, %{password: "test", password_confirmation: "other"})
       assert user == Accounts.get_user!(user.id)
     end
 
     test "without confirm_password returns error changeset" do
       user = user_fixture()
-      assert {:error, %Ecto.Changeset{}} = Accounts.change_password(user, %{password: "test"})
+      expect(MockPassword, :hash, 0, fn _ -> "not_called_for_update" end)
+
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, %{password: "test"})
       assert user == Accounts.get_user!(user.id)
     end
   end

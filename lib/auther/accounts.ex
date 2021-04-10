@@ -33,12 +33,6 @@ defmodule Auther.Accounts do
     |> Repo.update()
   end
 
-  def change_password(%User{} = user, attrs) do
-    user
-    |> User.changeset_for_password_change(attrs)
-    |> Repo.update()
-  end
-
   def delete_user(%User{} = user) do
     Repo.delete(user)
   end

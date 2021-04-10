@@ -27,8 +27,9 @@ defmodule Auther.Accounts.User do
 
   def changeset_for_update(user, attrs) do
     user
-    |> cast(attrs, [:name, :email])
+    |> cast(attrs, [:name, :email, :password])
     |> validate_required([:name, :email])
+    |> optional_handle_password()
   end
 
   def changeset_for_enable_2fa(user, tfa_attrs) do
@@ -43,15 +44,15 @@ defmodule Auther.Accounts.User do
     |> cast_assoc(:two_factor_auth, with: &TwoFactorAuth.changeset/2)
   end
 
-  def changeset_for_password_change(user, attrs) do
-    user
-    |> cast(attrs, [:password])
-    |> handle_password()
+  defp optional_handle_password(changeset) do
+    case fetch_change(changeset, :password) do
+      {:ok, _} -> handle_password(changeset)
+      :error -> changeset
+    end
   end
 
   defp handle_password(changeset) do
     changeset
-    |> validate_required([:password])
     |> validate_confirmation(:password, required: true)
     |> hash_password()
   end
