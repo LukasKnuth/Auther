@@ -22,16 +22,22 @@ defmodule AutherWeb.AuthPlugTest do
 
   defp user_fixture do
     Mox.stub(Auther.Security.Password.Mock, :hash, fn _ -> "pretend_like_im_hashed" end)
-    {:ok, user} = Accounts.create_user(%{name: "test", email: "test@user.de", password: "a", password_confirmation: "a"})
+
+    {:ok, user} =
+      Accounts.create_user(%{
+        name: "test",
+        email: "test@user.de",
+        password: "a",
+        password_confirmation: "a"
+      })
+
     user
   end
 
   defp run_plug_with(user \\ nil) do
     session_conn()
     |> maybe_put_session(user)
-    |> AutherWeb.AuthPlug.call(
-      AutherWeb.AuthPlug.init([])
-    )
+    |> AutherWeb.AuthPlug.call(AutherWeb.AuthPlug.init([]))
   end
 
   defp maybe_put_session(conn, nil), do: conn

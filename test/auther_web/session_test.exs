@@ -32,15 +32,17 @@ defmodule AutherWeb.SessionTest do
     end
 
     test "returns :error if username not found" do
-      assert {:error, :unknown_combination} = Session.authenticate_user("doesnt@exist.com", "irrelevant")
+      assert {:error, :unknown_combination} =
+               Session.authenticate_user("doesnt@exist.com", "irrelevant")
     end
   end
 
   describe "restore/1" do
     test "loads the user so that it's accessible again", %{user: user} do
-      conn = session_conn()
-      |> Conn.put_session("_auther_session_user", %{user_id: user.id})
-      |> Session.restore()
+      conn =
+        session_conn()
+        |> Conn.put_session("_auther_session_user", %{user_id: user.id})
+        |> Session.restore()
 
       assert Session.is_signed_in?(conn) == true
       assert Session.current_user!(conn) == user
@@ -109,6 +111,7 @@ defmodule AutherWeb.SessionTest do
 
   defp user_fixture! do
     {:ok, user} = Accounts.create_user(@user_attrs)
-    Map.put(user, :two_factor_auth, nil) # pretend like 2FA is preloaded
+    # pretend like 2FA is preloaded
+    Map.put(user, :two_factor_auth, nil)
   end
 end

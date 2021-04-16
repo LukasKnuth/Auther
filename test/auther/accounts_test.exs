@@ -98,6 +98,7 @@ defmodule Auther.AccountsTest do
 
       assert {:error, %Ecto.Changeset{}} =
                Accounts.update_user(user, %{password: "test", password_confirmation: "other"})
+
       assert user == Accounts.get_user!(user.id)
     end
 
