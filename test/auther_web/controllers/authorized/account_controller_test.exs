@@ -10,7 +10,7 @@ defmodule AutherWeb.Authorized.AccountControllerTest do
   end
 
   describe "GET #show" do
-    test_auth_required get: account_path(:show)
+    test_auth_required(get: account_path(:show))
 
     test "renders user information if logged in", %{logged_in_conn: conn, user: user} do
       conn = get(conn, Routes.account_path(conn, :show))
@@ -20,7 +20,7 @@ defmodule AutherWeb.Authorized.AccountControllerTest do
   end
 
   describe "GET #edit" do
-    test_auth_required get: account_path(:edit)
+    test_auth_required(get: account_path(:edit))
 
     test "renders edit form if logged in", %{logged_in_conn: conn} do
       conn = get(conn, Routes.account_path(conn, :edit))
@@ -30,7 +30,7 @@ defmodule AutherWeb.Authorized.AccountControllerTest do
   end
 
   describe "PUT #update" do
-    test_auth_required put: account_path(:update)
+    test_auth_required(put: account_path(:update))
 
     test "updates user info, flashes and redirects", %{logged_in_conn: conn, user: previous_user} do
       conn =
@@ -64,7 +64,10 @@ defmodule AutherWeb.Authorized.AccountControllerTest do
       assert user.password_hash == "pretend_its_a_hash"
     end
 
-    test "redirects without changes if no arguments are given", %{logged_in_conn: conn, user: previous_user} do
+    test "redirects without changes if no arguments are given", %{
+      logged_in_conn: conn,
+      user: previous_user
+    } do
       conn = put(conn, Routes.account_path(conn, :update))
 
       assert redirected_to(conn) == Routes.account_path(conn, :show)

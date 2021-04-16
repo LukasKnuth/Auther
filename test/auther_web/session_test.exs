@@ -29,7 +29,8 @@ defmodule AutherWeb.SessionTest do
 
   describe "restore/1" do
     test "loads the user so that it's accessible again", %{conn: conn, user: user} do
-      conn = conn
+      conn =
+        conn
         |> Conn.put_session("_auther_session_user", %{user_id: user.id})
         |> Session.restore()
 
