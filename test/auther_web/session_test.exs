@@ -1,30 +1,20 @@
 defmodule AutherWeb.SessionTest do
   use AutherWeb.ConnCase
 
-  alias Auther.Accounts
-  alias Auther.Security.Password.Mock, as: MockPassword
   alias AutherWeb.Session
   alias Plug.Conn
 
-  @user_attrs %{
-    email: "some@person.com",
-    name: "Somebody",
-    password: "test1234",
-    password_confirmation: "test1234"
-  }
-
-  setup do
-    Mox.stub(MockPassword, :hash, &Auther.Security.Password.Bcrypt.hash/1)
-    Mox.stub(MockPassword, :verify, &Auther.Security.Password.Bcrypt.verify/2)
-    user = user_fixture!()
-    conn = Session.sign_in(session_conn(), user)
-
-    [user: user, conn: conn]
+  setup %{conn: conn} do
+    Mox.stub(Auther.Security.Password.Mock, :verify, &Auther.Security.Password.Bcrypt.verify/2)
+    user = fixture(:user)
+    logged_in_conn = with_logged_in(conn, user)
+    session_conn = with_session(conn)
+    {:ok, %{logged_in_conn: logged_in_conn, conn: session_conn, user: user}}
   end
 
   describe "authenticate_user/2" do
     test "returns authenticated user if username/password are valid", %{user: user} do
-      assert {:ok, ^user} = Session.authenticate_user(user.email, "test1234")
+      assert {:ok, ^user} = Session.authenticate_user(user.email, "asdf1234")
     end
 
     test "returns :error if username is found but password doesn't match", %{user: user} do
@@ -38,9 +28,8 @@ defmodule AutherWeb.SessionTest do
   end
 
   describe "restore/1" do
-    test "loads the user so that it's accessible again", %{user: user} do
-      conn =
-        session_conn()
+    test "loads the user so that it's accessible again", %{conn: conn, user: user} do
+      conn = conn
         |> Conn.put_session("_auther_session_user", %{user_id: user.id})
         |> Session.restore()
 
@@ -48,17 +37,16 @@ defmodule AutherWeb.SessionTest do
       assert Session.current_user!(conn) == user
     end
 
-    test "does nothing if no user info is found in session" do
-      fresh_conn = session_conn()
-      restored_conn = Session.restore(fresh_conn)
+    test "does nothing if no user info is found in session", %{conn: conn} do
+      restored_conn = Session.restore(conn)
 
-      assert fresh_conn == restored_conn
+      assert conn == restored_conn
     end
   end
 
   describe "sign_in/2" do
-    test "writes user_id into session and user-Struct into privates", %{user: user} do
-      conn = Session.sign_in(session_conn(), user)
+    test "writes user_id into session and user-Struct into privates", %{conn: conn, user: user} do
+      conn = Session.sign_in(conn, user)
 
       assert Session.is_signed_in?(conn) == true
       assert Session.current_user!(conn) == user
@@ -66,7 +54,7 @@ defmodule AutherWeb.SessionTest do
   end
 
   describe "sign_out/1" do
-    test "clears the login state from the session", %{user: user, conn: conn} do
+    test "clears the login state from the session", %{user: user, logged_in_conn: conn} do
       assert Session.is_signed_in?(conn) == true
       assert Session.current_user!(conn) == user
 
@@ -78,40 +66,34 @@ defmodule AutherWeb.SessionTest do
   end
 
   describe "current_user/1" do
-    test "fetches current user from valid session", %{user: user, conn: conn} do
+    test "fetches current user from valid session", %{user: user, logged_in_conn: conn} do
       assert Session.current_user(conn) == {:ok, user}
     end
 
-    test "returns error for invalid session" do
-      assert Session.current_user(session_conn()) == :error
+    test "returns error for invalid session", %{conn: conn} do
+      assert Session.current_user(conn) == :error
     end
   end
 
   describe "current_user!/1" do
-    test "fetches current user from valid session", %{user: user, conn: conn} do
+    test "fetches current user from valid session", %{user: user, logged_in_conn: conn} do
       assert Session.current_user!(conn) == user
     end
 
-    test "returns error for invalid session" do
+    test "returns error for invalid session", %{conn: conn} do
       assert_raise KeyError, fn ->
-        Session.current_user!(session_conn())
+        Session.current_user!(conn)
       end
     end
   end
 
   describe "is_signed_in?/1" do
-    test "returns true for session with authenticated user", %{conn: conn} do
+    test "returns true for session with authenticated user", %{logged_in_conn: conn} do
       assert Session.is_signed_in?(conn) == true
     end
 
-    test "returns false for session without authenticated user" do
-      assert Session.is_signed_in?(session_conn()) == false
+    test "returns false for session without authenticated user", %{conn: conn} do
+      assert Session.is_signed_in?(conn) == false
     end
-  end
-
-  defp user_fixture! do
-    {:ok, user} = Accounts.create_user(@user_attrs)
-    # pretend like 2FA is preloaded
-    Map.put(user, :two_factor_auth, nil)
   end
 end

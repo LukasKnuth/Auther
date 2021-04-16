@@ -12,13 +12,10 @@ defmodule AutherWeb.SessionControllerTest do
       assert html_response(conn, 200) =~ "Login form"
     end
 
-    test "redirects to profile if user is already logged in" do
-      conn = session_conn()
-
+    test "redirects to profile if user is already logged in", %{conn: conn} do
       conn =
         conn
-        # NOTE: This works here, because the auth middleware doesn't run on this route.
-        |> Session.sign_in(%User{id: 1234, name: "Lukas"})
+        |> with_logged_in(fixture(:user))
         |> get(Routes.session_path(conn, :form))
 
       assert redirected_to(conn) == Routes.account_path(conn, :show)

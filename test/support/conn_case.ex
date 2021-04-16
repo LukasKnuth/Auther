@@ -22,17 +22,26 @@ defmodule AutherWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
+      import Auther.Fixtures
       import AutherWeb.ConnCase
+
+      import Plug.HTML, only: [html_escape: 1]
 
       alias AutherWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
       @endpoint AutherWeb.Endpoint
-
-      def session_conn(session \\ []) do
-        Plug.Test.init_test_session(build_conn(), session)
-      end
     end
+  end
+
+  def with_session(conn, session \\ %{}) do
+    Plug.Test.init_test_session(conn, session)
+  end
+
+  def with_logged_in(conn, %Auther.Accounts.User{} = user) do
+    conn
+    |> with_session()
+    |> AutherWeb.Session.sign_in(user)
   end
 
   setup tags do
