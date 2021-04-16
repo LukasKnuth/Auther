@@ -25,7 +25,7 @@ defmodule Auther.Accounts.User do
     |> handle_password()
   end
 
-  def changeset_for_update(user, attrs) do
+  def changeset_for_update(user, attrs \\ %{}) do
     user
     |> cast(attrs, [:name, :email, :password])
     |> validate_required([:name, :email])

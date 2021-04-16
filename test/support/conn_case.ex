@@ -44,6 +44,24 @@ defmodule AutherWeb.ConnCase do
     |> AutherWeb.Session.sign_in(user)
   end
 
+  @doc """
+  ## Examples
+
+    iex> test_auth_required(get: session_path(:show))
+    iex> test_auth_required(post: session_path(:login))
+  """
+  defmacro test_auth_required([{method, {name, _, args}}]) do
+    quote do
+      test "if not authenticated, redirects to login", %{conn: conn} do
+        alias AutherWeb.Router.Helpers, as: Routes
+        path = apply(Routes, unquote(name), [conn | unquote(args)])
+        conn = Phoenix.ConnTest.dispatch(conn, @endpoint, unquote(method), path)
+
+        assert redirected_to(conn) == Routes.session_path(conn, :form)
+      end
+    end
+  end
+
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Auther.Repo)
 

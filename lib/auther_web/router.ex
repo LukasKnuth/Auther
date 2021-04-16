@@ -34,7 +34,7 @@ defmodule AutherWeb.Router do
   scope "/account", AutherWeb.Authorized do
     pipe_through [:browser, :auth]
 
-    get "/", AccountController, :show
+    resources "/", AccountController, only: [:show, :edit, :update], singleton: true
   end
 
   # Other scopes may use custom stacks.
