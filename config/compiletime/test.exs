@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Knigge config
 config :auther, Auther.Security.Password, Auther.Security.Password.Mock
