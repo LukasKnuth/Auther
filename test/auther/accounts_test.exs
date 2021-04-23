@@ -11,12 +11,12 @@ defmodule Auther.AccountsTest do
 
   @pw_hash "$2b$12$rMFYMFy91qV6KTPclubTVOL9gpO55.JRWDRlaZccqsdbIXZA6O8Gi"
   @valid_attrs %{
-    email: "some email",
+    email: "some@email.com",
     name: "some name",
     password: "asdf1234",
     password_confirmation: "asdf1234"
   }
-  @update_attrs %{email: "some updated email", name: "some updated name"}
+  @update_attrs %{email: "some_updated@email.com", name: "some updated name"}
   @invalid_attrs %{email: nil, name: nil, password_hash: "anything"}
 
   setup do
@@ -47,7 +47,7 @@ defmodule Auther.AccountsTest do
   describe "create_user/1" do
     test "with valid data creates a user" do
       assert {:ok, %User{} = user} = Accounts.create_user(@valid_attrs)
-      assert user.email == "some email"
+      assert user.email == "some@email.com"
       assert user.name == "some name"
       assert user.password_hash == @pw_hash
     end
@@ -55,13 +55,28 @@ defmodule Auther.AccountsTest do
     test "with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Accounts.create_user(@invalid_attrs)
     end
+
+    test "converts email address to downcase" do
+      assert {:ok, %User{} = user} = Accounts.create_user(%{@valid_attrs | email: "TeST@SOmeWherE.dE"})
+
+      assert user.email == "test@somewhere.de"
+    end
+
+    test "fails if email is invalid" do
+      assert {:error, %Ecto.Changeset{}} = Accounts.create_user(%{@valid_attrs | email: "noatinhere"})
+    end
+
+    test "fails if email is already taken" do
+      assert {:ok, %User{}} = Accounts.create_user(@valid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Accounts.create_user(@valid_attrs)
+    end
   end
 
   describe "update_user/2" do
     test "with valid data updates the user" do
       user = user_fixture()
       assert {:ok, %User{} = user} = Accounts.update_user(user, @update_attrs)
-      assert user.email == "some updated email"
+      assert user.email == "some_updated@email.com"
       assert user.name == "some updated name"
       # unchanged
       assert user.password_hash == @pw_hash
@@ -110,6 +125,26 @@ defmodule Auther.AccountsTest do
 
       assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, %{password: "test"})
       assert user == Accounts.get_user!(user.id)
+    end
+
+    test "converts email address to downcase" do
+      user = user_fixture()
+
+      assert {:ok, %User{} = user} = Accounts.update_user(user, %{email: "TeST@SOmeWherE.dE"})
+      assert user.email == "test@somewhere.de"
+    end
+
+    test "fails if email is invalid" do
+      user = user_fixture()
+
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, %{email: "noatinhere"})
+    end
+
+    test "fails if email is already taken" do
+      assert {:ok, %User{}} = Accounts.create_user(%{@valid_attrs | email: "my@email"})
+
+      user = user_fixture()
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, %{email: "my@email"})
     end
   end
 

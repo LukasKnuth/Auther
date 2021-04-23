@@ -22,6 +22,7 @@ defmodule Auther.Accounts.User do
     user
     |> cast(attrs, [:name, :email, :password])
     |> validate_required([:name, :email, :password])
+    |> validate_email()
     |> handle_password()
   end
 
@@ -29,6 +30,7 @@ defmodule Auther.Accounts.User do
     user
     |> cast(attrs, [:name, :email, :password])
     |> validate_required([:name, :email])
+    |> validate_email()
     |> optional_handle_password()
   end
 
@@ -42,6 +44,13 @@ defmodule Auther.Accounts.User do
     user
     |> cast(%{two_factor_auth: nil}, [])
     |> cast_assoc(:two_factor_auth, with: &TwoFactorAuth.changeset/2)
+  end
+
+  defp validate_email(changeset) do
+    changeset
+    |> validate_format(:email, ~r/@/)
+    |> update_change(:email, &String.downcase/1)
+    |> unique_constraint(:email)
   end
 
   defp optional_handle_password(changeset) do
