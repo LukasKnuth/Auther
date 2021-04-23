@@ -27,3 +27,7 @@ config :logger, level: :warn
 
 # TEST ONLY: reduce bcrypt rounds to speed up test-execution
 config :bcrypt_elixir, :log_rounds, 4
+
+# Encryption key für symetric encryption implementation
+config :auther, Auther.Security.Encryption.AES,
+  secret_key: "I8KNkCkpUNyjhpl+L2KDQvzoCGIeFXuPcKPsvBtLQEM="
