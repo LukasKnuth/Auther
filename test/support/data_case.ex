@@ -24,6 +24,7 @@ defmodule Auther.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Auther.DataCase
+      import Auther.Fixtures
     end
   end
 

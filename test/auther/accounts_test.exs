@@ -5,6 +5,8 @@ defmodule Auther.AccountsTest do
 
   alias Auther.Accounts
   alias Auther.Accounts.{TwoFactorAuth, User}
+  alias Auther.Repo
+  alias Auther.Security.Encryption
   alias Auther.Security.Password.Mock, as: MockPassword
 
   @pw_hash "$2b$12$rMFYMFy91qV6KTPclubTVOL9gpO55.JRWDRlaZccqsdbIXZA6O8Gi"
@@ -145,6 +147,22 @@ defmodule Auther.AccountsTest do
       user = user_fixture()
       assert {:error, %Ecto.Changeset{}} = Accounts.enable_2fa(user, "secret", [])
       assert user.two_factor_auth == nil
+    end
+
+    test "stores the 2FA secret encrypted in the database" do
+      user = user_fixture()
+      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{} = tfa}} =
+        Accounts.enable_2fa(user, "secret", ["fallback"])
+
+      assert tfa.secret == "secret"
+
+      [%{secret: raw_secret}] = Repo.all(
+        from t in "two_factor_auth", where: [id: ^tfa.id], select: %{secret: t.secret}
+      )
+      assert raw_secret != tfa.secret
+
+      encrypted = Encryption.decrypt(raw_secret)
+      assert encrypted == tfa.secret
     end
   end
 

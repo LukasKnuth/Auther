@@ -3,10 +3,11 @@ defmodule Auther.Accounts.TwoFactorAuth do
   import Ecto.Changeset
 
   alias Auther.Accounts.User
+  alias Auther.Ecto.EncryptedType
 
   schema "two_factor_auth" do
     belongs_to :user, User
-    field :secret, :string
+    field :secret, EncryptedType
     field :fallback, {:array, :string}
 
     timestamps()
