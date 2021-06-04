@@ -57,13 +57,15 @@ defmodule Auther.AccountsTest do
     end
 
     test "converts email address to downcase" do
-      assert {:ok, %User{} = user} = Accounts.create_user(%{@valid_attrs | email: "TeST@SOmeWherE.dE"})
+      assert {:ok, %User{} = user} =
+               Accounts.create_user(%{@valid_attrs | email: "TeST@SOmeWherE.dE"})
 
       assert user.email == "test@somewhere.de"
     end
 
     test "fails if email is invalid" do
-      assert {:error, %Ecto.Changeset{}} = Accounts.create_user(%{@valid_attrs | email: "noatinhere"})
+      assert {:error, %Ecto.Changeset{}} =
+               Accounts.create_user(%{@valid_attrs | email: "noatinhere"})
     end
 
     test "fails if email is already taken" do
@@ -186,14 +188,15 @@ defmodule Auther.AccountsTest do
 
     test "stores the 2FA secret encrypted in the database" do
       user = user_fixture()
+
       assert {:ok, %User{two_factor_auth: %TwoFactorAuth{} = tfa}} =
-        Accounts.enable_2fa(user, "secret", ["fallback"])
+               Accounts.enable_2fa(user, "secret", ["fallback"])
 
       assert tfa.secret == "secret"
 
-      [%{secret: raw_secret}] = Repo.all(
-        from t in "two_factor_auth", where: [id: ^tfa.id], select: %{secret: t.secret}
-      )
+      [%{secret: raw_secret}] =
+        Repo.all(from t in "two_factor_auth", where: [id: ^tfa.id], select: %{secret: t.secret})
+
       assert raw_secret != tfa.secret
 
       encrypted = Encryption.decrypt(raw_secret)

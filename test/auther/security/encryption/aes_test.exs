@@ -29,7 +29,8 @@ defmodule Auther.Security.Encryption.AesTest do
     end
 
     test "raises if key doesn't have correct Base64 padding" do
-      key = "y5i2qv74yWBVc0nbnByZAhsk8SDK5JTCEBDy49DUFNw" # missing one = for padding
+      # missing one = for padding
+      key = "y5i2qv74yWBVc0nbnByZAhsk8SDK5JTCEBDy49DUFNw"
 
       assert_raise RuntimeError, "Couldn't base64 decode secret key", fn ->
         AES.validate_key!(key)
@@ -37,7 +38,8 @@ defmodule Auther.Security.Encryption.AesTest do
     end
 
     test "raises if key isn't expected size" do
-      key = "d+3Ak5AlB3v4nscSN2fC/4DIQmBMDn9LmS4gvUwI5g==" # only 31 bytes
+      # only 31 bytes
+      key = "d+3Ak5AlB3v4nscSN2fC/4DIQmBMDn9LmS4gvUwI5g=="
 
       assert_raise RuntimeError, "Invalid key size. Must be 32 bytes", fn ->
         AES.validate_key!(key)

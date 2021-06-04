@@ -31,6 +31,7 @@ defmodule Auther.Security.Encryption.AES do
     if byte_size(decode_key!(key)) != 32 do
       raise "Invalid key size. Must be 32 bytes"
     end
+
     key
   end
 

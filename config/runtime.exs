@@ -2,8 +2,7 @@
 # from environment variables.
 import Config
 
-config :auther, Auther.Repo,
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+config :auther, Auther.Repo, pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
 config :auther, AutherWeb.Endpoint,
   http: [
@@ -13,6 +12,7 @@ config :auther, AutherWeb.Endpoint,
 
 # Load runtime config for specific environment, if it exists.
 env_config = "runtime/#{config_env()}.exs"
+
 if File.exists?(env_config) do
   import_config env_config
 end

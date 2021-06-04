@@ -18,13 +18,16 @@ secret_key_base =
 
 config :auther, AutherWeb.Endpoint, secret_key_base: secret_key_base
 
-encryption_key = case System.get_env("ENCRYPTION_KEY") do
-  nil -> raise """
-  environment variable ENCRYPTION KEY is missing.
-  To generate one, run iex> :crypto.strong_rand_bytes(32) |> Base.encode64()
-  """
+encryption_key =
+  case System.get_env("ENCRYPTION_KEY") do
+    nil ->
+      raise """
+      environment variable ENCRYPTION KEY is missing.
+      To generate one, run iex> :crypto.strong_rand_bytes(32) |> Base.encode64()
+      """
 
-  key -> Auther.Security.Encryption.AES.validate_key!()
-end
+    key ->
+      Auther.Security.Encryption.AES.validate_key!()
+  end
 
 config :auther, Auther.Security.Encryption.AES, secret_key: encryption_key
