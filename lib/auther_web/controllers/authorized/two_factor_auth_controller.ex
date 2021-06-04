@@ -42,12 +42,11 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
       |> case do
         {:ok, _user} ->
           conn
-          |> put_flash(:info, gettext("Two Factor Auth enabled succesfully!"))
+          |> put_flash(:info, gettext("Two Factor Auth enabled successfully!"))
           |> redirect(to: Routes.two_factor_auth_path(conn, :show))
 
         {:error, changeset} ->
-          Logger.error("Couldn't enable 2FA because of invalid changeset", changeset)
-
+          Logger.error("Couldn't enable 2FA because of invalid changeset", changeset.errors)
           conn
           |> put_flash(
             :error,
@@ -79,7 +78,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
         |> redirect(to: Routes.two_factor_auth_path(conn, :show))
 
       {:error, changeset} ->
-        Logger.error("Couldn't deactivate 2FA because of invalid changeset", changeset)
+        Logger.error("Couldn't deactivate 2FA because of invalid changeset", changeset.errors)
 
         conn
         |> put_flash(

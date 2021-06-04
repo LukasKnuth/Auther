@@ -1,6 +1,6 @@
 <h2>Two-Factor Authentication</h2>
 <%= if @error != nil do %>
-  <p><b>Error:</b> <%= @error %></p>
+  <p class="error"><b>Error:</b> <%= @error %></p>
 <% end %>
 <%= form_for @conn, @action, [as: :two_factor_auth], fn f -> %>
   <%= tfa_input f, :otp %>
