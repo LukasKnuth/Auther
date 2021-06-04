@@ -13,16 +13,22 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
 
   def show(conn, _params) do
     tfa_enabled = tfa_enabled?(Session.current_user!(conn))
-    conn = unless tfa_enabled do
-      secret = TwoFactorAuth.generate_secret()
 
-      conn
-      |> put_secret(secret)
-      |> Conn.assign(:secret, secret)
-    else
-      conn
-    end
-    render(conn, :show, action: Routes.two_factor_auth_path(conn, :update), tfa_enabled: tfa_enabled)
+    conn =
+      unless tfa_enabled do
+        secret = TwoFactorAuth.generate_secret()
+
+        conn
+        |> put_secret(secret)
+        |> Conn.assign(:secret, secret)
+      else
+        conn
+      end
+
+    render(conn, :show,
+      action: Routes.two_factor_auth_path(conn, :update),
+      tfa_enabled: tfa_enabled
+    )
   end
 
   def update(conn, %{"action" => "enable", "confirmation" => confirmation}) do
@@ -45,13 +51,18 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
           conn
           |> put_flash(
             :error,
-            gettext("Couldn't enable Two Factor Auth because of internal problems. Try again later...")
+            gettext(
+              "Couldn't enable Two Factor Auth because of internal problems. Try again later..."
+            )
           )
           |> redirect(to: Routes.two_factor_auth_path(conn, :show))
       end
     else
       conn
-      |> put_flash(:error, gettext("Secret and OTP token didn't match. Generated new secret, try again."))
+      |> put_flash(
+        :error,
+        gettext("Secret and OTP token didn't match. Generated new secret, try again.")
+      )
       |> redirect(to: Routes.two_factor_auth_path(conn, :show))
     end
   end
@@ -73,7 +84,9 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
         conn
         |> put_flash(
           :error,
-          gettext("Couldn't disable Two Factor Auth because of internal problems. Try again later...")
+          gettext(
+            "Couldn't disable Two Factor Auth because of internal problems. Try again later..."
+          )
         )
         |> redirect(to: Routes.two_factor_auth_path(conn, :show))
     end
@@ -98,7 +111,9 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
     else
       do_render_prompt(
         conn,
-        gettext("One-time password wasn't valid. Make sure the system clock on your device is up-to-date.")
+        gettext(
+          "One-time password wasn't valid. Make sure the system clock on your device is up-to-date."
+        )
       )
     end
   end
