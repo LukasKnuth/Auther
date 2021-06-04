@@ -14,7 +14,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthView do
   end
 
   def tfa_input(form, field, opts \\ []) do
-    opts = Keyword.merge([inputmode: "numeric", autocomplete: "one-time-code"], opts)
+    opts = Keyword.merge(opts, inputmode: "numeric", autocomplete: "one-time-code")
     Form.text_input(form, field, opts)
   end
 end
