@@ -3,7 +3,7 @@
   <p><b>Error:</b> <%= @error %></p>
 <% end %>
 <%= form_for @conn, @action, [as: :two_factor_auth], fn f -> %>
-  <%= text_input f, :otp %>
+  <%= tfa_input f, :otp %>
 
   <%= submit do: "Verify" %>
 <% end %>

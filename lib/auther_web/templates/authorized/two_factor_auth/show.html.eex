@@ -29,7 +29,7 @@
     <%= render_qrcode(@conn, @secret) %>
 
     <%= label f, :confirmation, "Enter Key" %>
-    <%= text_input f, :confirmation %>
+    <%= tfa_input f, :confirmation %>
 
     <%= submit [name: "action", value: "enable"], do: "Enable 2FA" %>
   <% end %>
