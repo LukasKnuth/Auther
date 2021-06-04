@@ -3,6 +3,8 @@ defmodule AutherWeb.Authorized.AccountControllerTest do
 
   alias Auther.Accounts
 
+  setup :verify_on_exit!
+
   setup %{conn: conn} do
     user = fixture(:user)
     conn = with_logged_in(conn, user)
@@ -48,7 +50,7 @@ defmodule AutherWeb.Authorized.AccountControllerTest do
     end
 
     test "updates password, falshes and redirects", %{logged_in_conn: conn, user: previous_user} do
-      Mox.stub(Auther.Security.Password.Mock, :hash, fn _ -> "pretend_its_a_hash" end)
+      stub(Auther.Security.Password.Mock, :hash, fn _ -> "pretend_its_a_hash" end)
 
       conn =
         put(conn, Routes.account_path(conn, :update), %{

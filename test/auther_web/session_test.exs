@@ -4,8 +4,10 @@ defmodule AutherWeb.SessionTest do
   alias AutherWeb.Session
   alias Plug.Conn
 
+  setup :verify_on_exit!
+
   setup %{conn: conn} do
-    Mox.stub(Auther.Security.Password.Mock, :verify, &Auther.Security.Password.Bcrypt.verify/2)
+    stub(Auther.Security.Password.Mock, :verify, &Auther.Security.Password.Bcrypt.verify/2)
     user = fixture(:user)
     logged_in_conn = with_logged_in(conn, user)
     session_conn = with_session(conn)

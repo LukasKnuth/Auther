@@ -5,6 +5,8 @@ defmodule AutherWeb.SessionControllerTest do
   alias Auther.Accounts.User
   alias AutherWeb.Session
 
+  setup :verify_on_exit!
+
   describe "GET #form" do
     test "returns the HTML form", %{conn: conn} do
       conn = get(conn, Routes.session_path(conn, :form))
@@ -44,8 +46,8 @@ defmodule AutherWeb.SessionControllerTest do
     end
 
     test "with valid email/password redirects and flashes info", %{conn: conn} do
-      Mox.stub(Auther.Security.Password.Mock, :hash, &Auther.Security.Password.Bcrypt.hash/1)
-      Mox.stub(Auther.Security.Password.Mock, :verify, &Auther.Security.Password.Bcrypt.verify/2)
+      stub(Auther.Security.Password.Mock, :hash, &Auther.Security.Password.Bcrypt.hash/1)
+      stub(Auther.Security.Password.Mock, :verify, &Auther.Security.Password.Bcrypt.verify/2)
 
       {:ok, %User{}} =
         Accounts.create_user(%{

@@ -6,9 +6,11 @@ defmodule AutherWeb.Authorized.TwoFactorAuthViewTest do
   alias Auther.Security.TwoFactorAuth.Mock, as: TfaMock
   alias AutherWeb.Authorized.TwoFactorAuthView, as: View
 
+  setup :verify_on_exit!
+
   describe "render_qrcode/2" do
     setup %{conn: conn} do
-      Mox.expect(TfaMock, :otpauth_uri, fn _secret, _user ->
+      expect(TfaMock, :otpauth_uri, fn _secret, _user ->
         "otpauth://totp/Test:some@body.com?secret=JBSWY3DPEHPK3PXP&issuer=Test"
       end)
 
