@@ -35,6 +35,11 @@ defmodule AutherWeb.Router do
     pipe_through [:browser, :auth]
 
     resources "/", AccountController, only: [:show, :edit, :update], singleton: true
+
+    get "/2fa", TwoFactorAuthController, :show
+    post "/2fa/update", TwoFactorAuthController, :update
+    get "/2fa/prompt", TwoFactorAuthController, :prompt
+    post "/2fa/prompt", TwoFactorAuthController, :verify
   end
 
   # Other scopes may use custom stacks.

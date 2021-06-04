@@ -34,7 +34,7 @@ defmodule Auther.Accounts.User do
     |> optional_handle_password()
   end
 
-  def changeset_for_enable_2fa(user, tfa_attrs) do
+  def changeset_for_enable_2fa(user, tfa_attrs \\ %{}) do
     user
     |> cast(%{two_factor_auth: tfa_attrs}, [])
     |> cast_assoc(:two_factor_auth, with: &TwoFactorAuth.changeset/2, required: true)

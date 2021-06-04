@@ -1,0 +1,36 @@
+<h1>Security</h1>
+<p>Two-Factor Authentication is <strong>
+  <%= if @tfa_enabled do %>Enabled<% else %>Disabled<% end %>
+</p>
+
+<hr>
+
+<%= if @tfa_enabled do %>
+  <h2>Disable Two-Factor Authentication</h2>
+  <p>Note: We do not recommend this!</p>
+
+  <%= form_for @conn, @action do %>
+    <%= submit [name: "action", value: "disable"], do: "Disable 2FA" %>
+  <% end %>
+<% else %>
+  <h2>Enable Two-Factor Authentication</h2>
+
+  <%= if get_flash(@conn, :error) != nil do %>
+    <p><b>Error:</b> <%= get_flash(@conn, :error) %></p>
+  <% end %>
+  <%= if get_flash(@conn, :warn) != nil do %>
+    <p><b>Warning:</b> <%= get_flash(@conn, :warn) %></p>
+  <% end %>
+  <%= if get_flash(@conn, :info) != nil do %>
+    <p><b>Note:</b> <%= get_flash(@conn, :info) %></p>
+  <% end %>
+
+  <%= form_for @conn, @action, fn f -> %>
+    <%= render_qrcode(@conn, @secret) %>
+
+    <%= label f, :confirmation, "Enter Key" %>
+    <%= text_input f, :confirmation %>
+
+    <%= submit [name: "action", value: "enable"], do: "Enable 2FA" %>
+  <% end %>
+<% end %>

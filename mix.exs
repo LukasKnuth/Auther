@@ -51,6 +51,7 @@ defmodule Auther.MixProject do
 
       # 2FA Time-Based One-Time Password
       {:nimble_totp, "~> 0.1.1"},
+      {:eqrcode, "~> 0.1.8"},
 
       # Automate mock creation for testing
       {:mox, "~> 1.0", only: :test},
