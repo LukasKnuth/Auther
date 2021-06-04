@@ -1,4 +1,5 @@
 %{
+  "assert_html": {:hex, :assert_html, "0.1.2", "d87fb80ca5ee190f9be97fbdc649826c17135fff1a1cfcef6ea5be550a1fcd4d", [:mix], [{:floki, "~> 0.21", [hex: :floki, repo: "hexpm", optional: false]}], "hexpm", "602212a42bad9026f297a72366087ffeece7e39a3504fc587153f90e738e4272"},
   "bcrypt_elixir": {:hex, :bcrypt_elixir, "2.3.0", "6cb662d5c1b0a8858801cf20997bd006e7016aa8c52959c9ef80e0f34fb60b7a", [:make, :mix], [{:comeonin, "~> 5.3", [hex: :comeonin, repo: "hexpm", optional: false]}, {:elixir_make, "~> 0.6", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm", "2c81d61d4f6ed0e5cf7bf27a9109b791ff216a1034b3d541327484f46dd43769"},
   "bunt": {:hex, :bunt, "0.2.0", "951c6e801e8b1d2cbe58ebbd3e616a869061ddadcc4863d0a2182541acae9a38", [:mix], [], "hexpm", "7af5c7e09fe1d40f76c8e4f9dd2be7cebd83909f31fee7cd0e9eadc567da8353"},
   "comeonin": {:hex, :comeonin, "5.3.2", "5c2f893d05c56ae3f5e24c1b983c2d5dfb88c6d979c9287a76a7feb1e1d8d646", [:mix], [], "hexpm", "d0993402844c49539aeadb3fe46a3c9bd190f1ecf86b6f9ebd71957534c95f04"},
@@ -13,7 +14,9 @@
   "elixir_make": {:hex, :elixir_make, "0.6.2", "7dffacd77dec4c37b39af867cedaabb0b59f6a871f89722c25b28fcd4bd70530", [:mix], [], "hexpm", "03e49eadda22526a7e5279d53321d1cced6552f344ba4e03e619063de75348d9"},
   "eqrcode": {:hex, :eqrcode, "0.1.8", "5c97ce5626ad8712264eeb6cbb62f7300c3402d8de711c9159894c7b3db8af7b", [:mix], [], "hexpm", "cd15dda9e85b9e6bbd8ec536b373440d5268d1ef6200a9c0e367fd1f49b96e62"},
   "file_system": {:hex, :file_system, "0.2.10", "fb082005a9cd1711c05b5248710f8826b02d7d1784e7c3451f9c1231d4fc162d", [:mix], [], "hexpm", "41195edbfb562a593726eda3b3e8b103a309b733ad25f3d642ba49696bf715dc"},
+  "floki": {:hex, :floki, "0.30.1", "75d35526d3a1459920b6e87fdbc2e0b8a3670f965dd0903708d2b267e0904c55", [:mix], [{:html_entities, "~> 0.5.0", [hex: :html_entities, repo: "hexpm", optional: false]}], "hexpm", "e9c03524447d1c4cbfccd672d739b8c18453eee377846b119d4fd71b1a176bb8"},
   "gettext": {:hex, :gettext, "0.18.2", "7df3ea191bb56c0309c00a783334b288d08a879f53a7014341284635850a6e55", [:mix], [], "hexpm", "f9f537b13d4fdd30f3039d33cb80144c3aa1f8d9698e47d7bcbcc8df93b1f5c5"},
+  "html_entities": {:hex, :html_entities, "0.5.2", "9e47e70598da7de2a9ff6af8758399251db6dbb7eebe2b013f2bbd2515895c3c", [:mix], [], "hexpm", "c53ba390403485615623b9531e97696f076ed415e8d8058b1dbaa28181f4fdcc"},
   "jason": {:hex, :jason, "1.2.2", "ba43e3f2709fd1aa1dce90aaabfd039d000469c05c56f0b8e31978e03fa39052", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "18a228f5f0058ee183f29f9eae0805c6e59d61c3b006760668d8d18ff0d12179"},
   "knigge": {:hex, :knigge, "1.4.0", "c1d035562cb6a5d86c317f908afa5b0d9550ad6408361b3ca964fa004c11c8f1", [:mix], [{:bunt, "~> 0.2", [hex: :bunt, repo: "hexpm", optional: false]}], "hexpm", "64dc36403d37a35a3f0637ad6501f26ca74907eec094ab361e7cc558259dbc4d"},
   "mime": {:hex, :mime, "1.6.0", "dabde576a497cef4bbdd60aceee8160e02a6c89250d6c0b29e56c0dfb00db3d2", [:mix], [], "hexpm", "31a1a8613f8321143dde1dafc36006a17d28d02bdfecb9e95a880fa7aabd19a7"},

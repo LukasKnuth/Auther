@@ -26,6 +26,7 @@ defmodule AutherWeb.ConnCase do
       import AutherWeb.ConnCase
 
       import Plug.HTML, only: [html_escape: 1]
+      import AssertHTML
       import Mox
 
       alias AutherWeb.Router.Helpers, as: Routes

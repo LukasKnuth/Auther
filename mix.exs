@@ -55,7 +55,10 @@ defmodule Auther.MixProject do
 
       # Automate mock creation for testing
       {:mox, "~> 1.0", only: :test},
-      {:knigge, "~> 1.3"}
+      {:knigge, "~> 1.3"},
+
+      # Asserting HTML elements in tests
+      {:assert_html, "~> 0.1.2"}
     ]
   end
 
