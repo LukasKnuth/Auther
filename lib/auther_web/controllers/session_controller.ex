@@ -1,15 +1,20 @@
 defmodule AutherWeb.SessionController do
   use AutherWeb, :controller
-  import AutherWeb.Gettext
 
+  alias AutherWeb.RedirectTarget
   alias AutherWeb.Session
 
   def form(conn, _params) do
     if Session.is_signed_in?(conn) do
       login_redirect(conn)
     else
-      render(conn, :form)
+      do_render_form(conn)
     end
+  end
+
+  defp do_render_form(conn) do
+    params = RedirectTarget.query_to_url_param(conn)
+    render(conn, :form, action: Routes.session_path(conn, :login, params))
   end
 
   def login(conn, %{"email" => email, "password" => password}) do
@@ -22,7 +27,7 @@ defmodule AutherWeb.SessionController do
   defp login_reply({:error, :unknown_combination}, conn) do
     conn
     |> put_flash(:error, gettext("Unknown email/password combination"))
-    |> render(:form)
+    |> do_render_form()
   end
 
   defp login_reply({:ok, user}, conn) do
@@ -39,6 +44,5 @@ defmodule AutherWeb.SessionController do
     |> redirect(to: Routes.session_path(conn, :form))
   end
 
-  # todo later: restore sent redirect_url, redirect there!
-  defp login_redirect(conn), do: redirect(conn, to: Routes.account_path(conn, :show))
+  defp login_redirect(conn), do: redirect(conn, to: RedirectTarget.get(conn))
 end

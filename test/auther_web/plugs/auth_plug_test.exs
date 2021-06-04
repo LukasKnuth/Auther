@@ -8,7 +8,7 @@ defmodule AutherWeb.AuthPlugTest do
     conn = run_plug_with(conn)
 
     assert conn.halted == true
-    assert redirected_to(conn) == Routes.session_path(conn, :form)
+    assert redirected_to(conn) == Routes.session_path(conn, :form, target: "/")
   end
 
   test "restores the sessio if user is logged in", %{conn: conn} do

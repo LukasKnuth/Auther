@@ -56,8 +56,9 @@ defmodule AutherWeb.ConnCase do
         alias AutherWeb.Router.Helpers, as: Routes
         path = apply(Routes, unquote(name), [conn | unquote(args)])
         conn = Phoenix.ConnTest.dispatch(conn, @endpoint, unquote(method), path)
+        params = AutherWeb.RedirectTarget.as_url_param!(path)
 
-        assert redirected_to(conn) == Routes.session_path(conn, :form)
+        assert redirected_to(conn) == Routes.session_path(conn, :form, params)
       end
     end
   end
