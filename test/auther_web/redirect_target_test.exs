@@ -16,8 +16,13 @@ defmodule AutherWeb.RedirectTargetTest do
     end
 
     test "returns :valid and adds starting / if target doesn't have it" do
-      conn = test_conn(target: "no/starting/slash")
-      assert RedirectTarget.fetch(conn) == {:valid, "/no/starting/slash"}
+      conn = test_conn(target: "no/starting/slash?param=val")
+      assert RedirectTarget.fetch(conn) == {:valid, "/no/starting/slash?param=val"}
+    end
+
+    test "returns :valid and route with query-parameters if target is valid" do
+      conn = test_conn(target: "/some/where?param=value")
+      assert RedirectTarget.fetch(conn) == {:valid, "/some/where?param=value"}
     end
 
     test "returns :error if target isn't found in query-params" do
@@ -60,9 +65,19 @@ defmodule AutherWeb.RedirectTargetTest do
   end
 
   describe "as_url_param/2" do
-    test "returns :valid and url-param for valid target route", %{conn: conn} do
+    test "returns :ok and url-param for valid target route", %{conn: conn} do
       route = Routes.session_path(conn, :form)
       assert RedirectTarget.as_url_param(route) == {:ok, [{"target", route}]}
+    end
+
+    test "returns :ok and url-param with query-params for valid target route with query-params" do
+      assert RedirectTarget.as_url_param("/some/where?test=yes") ==
+               {:ok, [{"target", "/some/where?test=yes"}]}
+    end
+
+    test "returns :ok and url-param with leading / for target route without leading / and query-params" do
+      assert RedirectTarget.as_url_param("route?param=value") ==
+               {:ok, [{"target", "/route?param=value"}]}
     end
 
     test "returns :invalid for invalid target route" do
@@ -96,9 +111,14 @@ defmodule AutherWeb.RedirectTargetTest do
       assert RedirectTarget.query_to_url_param(conn, key: "go_to") == [{"go_to", "/a/route"}]
     end
 
+    test "returns the target keyword list with query-params if target has them" do
+      conn = test_conn(target: "/some/route?param=hello")
+      assert RedirectTarget.query_to_url_param(conn) == [{"target", "/some/route?param=hello"}]
+    end
+
     test "returns the target keyword list with starting / if query-parameter doesn't have it" do
-      conn = test_conn(target: "no/slash")
-      assert RedirectTarget.query_to_url_param(conn) == [{"target", "/no/slash"}]
+      conn = test_conn(target: "no/slash?param=val")
+      assert RedirectTarget.query_to_url_param(conn) == [{"target", "/no/slash?param=val"}]
     end
 
     test "returns empty keyword list if target not in query-parameters" do

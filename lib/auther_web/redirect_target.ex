@@ -79,8 +79,8 @@ defmodule AutherWeb.RedirectTarget do
   defp validate_target(target) do
     with %{host: nil, scheme: nil, authority: nil, path: path} = uri <- URI.parse(target) do
       case validate_path(path) do
-        {:valid, path} ->
-          {:valid, path}
+        :valid ->
+          {:valid, target}
 
         {:sanitized, path} ->
           uri = Map.put(uri, :path, path)
@@ -99,7 +99,7 @@ defmodule AutherWeb.RedirectTarget do
       # todo maybe get something more suffisticated in here?>
       String.contains?(path, "../") -> :invalid
       !String.starts_with?(path, "/") -> {:sanitized, "/" <> path}
-      true -> {:valid, path}
+      true -> :valid
     end
   end
 end
