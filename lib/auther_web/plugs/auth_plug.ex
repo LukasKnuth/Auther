@@ -23,18 +23,7 @@ defmodule AutherWeb.AuthPlug do
 
   defp auth_reply(false, conn) do
     conn
-    |> redirect(to: Routes.session_path(conn, :form, target_param(conn)))
+    |> redirect(to: Routes.session_path(conn, :form, RedirectTarget.from_original_request!(conn)))
     |> halt()
-  end
-
-  defp target_param(conn) do
-    target =
-      if String.length(conn.query_string) > 0 do
-        conn.request_path <> "?" <> conn.query_string
-      else
-        conn.request_path
-      end
-
-    RedirectTarget.as_url_param!(target)
   end
 end

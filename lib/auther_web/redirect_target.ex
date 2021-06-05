@@ -5,9 +5,13 @@ defmodule AutherWeb.RedirectTarget do
 
   alias AutherWeb.Router.Helpers, as: Routes
 
+  @type url_param :: keyword()
+  @type relative_url :: String.t()
+  @type options :: [key: String.t(), fallback: String.t()]
+
   @default_key "target"
 
-  @spec fetch(Plug.Conn.t(), keyword()) :: {:valid, String.t()} | :invalid | :error
+  @spec fetch(Plug.Conn.t(), options()) :: {:valid, relative_url()} | :invalid | :error
   def fetch(conn, options \\ []) do
     key = param_key(options)
 
@@ -22,7 +26,7 @@ defmodule AutherWeb.RedirectTarget do
   Returns the target route from the query-parameter or a fallback route to navigate to, after the controller-action
    is done.
   """
-  @spec get(Plug.Conn.t(), keyword()) :: String.t()
+  @spec get(Plug.Conn.t(), options()) :: relative_url()
   def get(conn, options \\ []) do
     case fetch(conn, options) do
       {:valid, target} -> target
@@ -33,7 +37,7 @@ defmodule AutherWeb.RedirectTarget do
   @doc """
   Validate and create url parameters to be used with route-helpers from the given target URL.
   """
-  @spec as_url_param(String.t(), keyword()) :: {:ok, keyword()} | :invalid
+  @spec as_url_param(relative_url(), options()) :: {:ok, url_param()} | :invalid
   def as_url_param(target, options \\ []) do
     name = param_key(options)
 
@@ -43,7 +47,7 @@ defmodule AutherWeb.RedirectTarget do
     end
   end
 
-  @spec as_url_param!(String.t(), keyword()) :: keyword()
+  @spec as_url_param!(relative_url(), options()) :: url_param()
   def as_url_param!(target, options \\ []) do
     case as_url_param(target, options) do
       {:ok, url_param} -> url_param
@@ -52,9 +56,24 @@ defmodule AutherWeb.RedirectTarget do
   end
 
   @doc """
+  Take path and query from the request in the Connection and turn it into a target parameter.
+  """
+  @spec from_original_request!(Plug.Conn.t(), options()) :: url_param()
+  def from_original_request!(conn, options \\ []) do
+    target =
+      if String.length(conn.query_string) > 0 do
+        conn.request_path <> "?" <> conn.query_string
+      else
+        conn.request_path
+      end
+
+    as_url_param!(target, options)
+  end
+
+  @doc """
   Extract, validate and return the redirect target for use as a query parameter in a route-helper.
   """
-  @spec query_to_url_param(Plug.Conn.t(), keyword()) :: keyword()
+  @spec query_to_url_param(Plug.Conn.t(), options()) :: url_param()
   def query_to_url_param(conn, options \\ []) do
     key = param_key(options)
 

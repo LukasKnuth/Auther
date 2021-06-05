@@ -98,6 +98,34 @@ defmodule AutherWeb.RedirectTargetTest do
     end
   end
 
+  describe "from_original_request!/2" do
+    test "places path and query-parameters into target parameter" do
+      conn = build_conn(:get, "/some/where", info: "message")
+
+      assert RedirectTarget.from_original_request!(conn) == [
+               {"target", "/some/where?info=message"}
+             ]
+    end
+
+    test "adds no ? if query-parameters are empty" do
+      conn = build_conn(:get, "/another/place")
+
+      assert RedirectTarget.from_original_request!(conn) == [{"target", "/another/place"}]
+    end
+
+    test "respects key option if set" do
+      conn = build_conn(:get, "/here", blink: "1")
+
+      assert RedirectTarget.from_original_request!(conn, key: :go_to) == [
+               {:go_to, "/here?blink=1"}
+             ]
+
+      assert RedirectTarget.from_original_request!(conn, key: "go_to") == [
+               {"go_to", "/here?blink=1"}
+             ]
+    end
+  end
+
   describe "query_to_url_param/2" do
     test "returns the target as keyword list from query-parameters" do
       conn = test_conn(target: "/some/where")
