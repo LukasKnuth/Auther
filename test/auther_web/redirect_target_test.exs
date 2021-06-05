@@ -5,18 +5,23 @@ defmodule AutherWeb.RedirectTargetTest do
 
   describe "fetch/2" do
     test "returns :valid and route if target is found and valid" do
-      conn = test_conn(target: "some/where")
-      assert RedirectTarget.fetch(conn) == {:valid, "some/where"}
+      conn = test_conn(target: "/some/where")
+      assert RedirectTarget.fetch(conn) == {:valid, "/some/where"}
     end
 
     test "returns :valid and route for custom query-param name (string or atom)" do
-      conn = test_conn(go_to: "another/place")
-      assert RedirectTarget.fetch(conn, key: :go_to) == {:valid, "another/place"}
-      assert RedirectTarget.fetch(conn, key: "go_to") == {:valid, "another/place"}
+      conn = test_conn(go_to: "/another/place")
+      assert RedirectTarget.fetch(conn, key: :go_to) == {:valid, "/another/place"}
+      assert RedirectTarget.fetch(conn, key: "go_to") == {:valid, "/another/place"}
+    end
+
+    test "returns :valid and adds starting / if target doesn't have it" do
+      conn = test_conn(target: "no/starting/slash")
+      assert RedirectTarget.fetch(conn) == {:valid, "/no/starting/slash"}
     end
 
     test "returns :error if target isn't found in query-params" do
-      conn = test_conn(go_to: "some/route/here")
+      conn = test_conn(go_to: "/some/route/here")
       assert RedirectTarget.fetch(conn) == :error
     end
 
@@ -31,26 +36,26 @@ defmodule AutherWeb.RedirectTargetTest do
     end
 
     test "returns :invalid if fallback target is traversing directories" do
-      conn = test_conn(target: "somethign/../../admin")
+      conn = test_conn(target: "/somethign/../../admin")
       assert RedirectTarget.fetch(conn) == :invalid
     end
   end
 
   describe "get/2" do
     test "returns the target route from the query-parameters" do
-      assert RedirectTarget.get(test_conn(target: "some/other/route")) ==
-               "some/other/route"
+      assert RedirectTarget.get(test_conn(target: "/some/other/route")) ==
+               "/some/other/route"
     end
 
     test "returns the target route for different key-parameter" do
-      conn = test_conn(goal: "another/route")
+      conn = test_conn(goal: "/another/route")
 
-      assert RedirectTarget.get(conn, key: :goal) == "another/route"
-      assert RedirectTarget.get(conn, key: "goal") == "another/route"
+      assert RedirectTarget.get(conn, key: :goal) == "/another/route"
+      assert RedirectTarget.get(conn, key: "goal") == "/another/route"
     end
 
     test "returns the fallback route if no target is in the query-parameters", %{conn: conn} do
-      assert RedirectTarget.get(conn, fallback: "fb") == "fb"
+      assert RedirectTarget.get(conn, fallback: "/fb") == "/fb"
     end
   end
 
@@ -80,15 +85,20 @@ defmodule AutherWeb.RedirectTargetTest do
 
   describe "query_to_url_param/2" do
     test "returns the target as keyword list from query-parameters" do
-      conn = test_conn(target: "some/where")
-      assert RedirectTarget.query_to_url_param(conn) == [{"target", "some/where"}]
+      conn = test_conn(target: "/some/where")
+      assert RedirectTarget.query_to_url_param(conn) == [{"target", "/some/where"}]
     end
 
     test "returns the target for different key-parameter" do
-      conn = test_conn(go_to: "a/route")
+      conn = test_conn(go_to: "/a/route")
 
-      assert RedirectTarget.query_to_url_param(conn, key: :go_to) == [{:go_to, "a/route"}]
-      assert RedirectTarget.query_to_url_param(conn, key: "go_to") == [{"go_to", "a/route"}]
+      assert RedirectTarget.query_to_url_param(conn, key: :go_to) == [{:go_to, "/a/route"}]
+      assert RedirectTarget.query_to_url_param(conn, key: "go_to") == [{"go_to", "/a/route"}]
+    end
+
+    test "returns the target keyword list with starting / if query-parameter doesn't have it" do
+      conn = test_conn(target: "no/slash")
+      assert RedirectTarget.query_to_url_param(conn) == [{"target", "/no/slash"}]
     end
 
     test "returns empty keyword list if target not in query-parameters" do

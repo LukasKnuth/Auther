@@ -59,7 +59,7 @@ defmodule AutherWeb.RedirectTarget do
     key = param_key(options)
 
     with {:ok, target} <- fetch_query_param(conn, key),
-         {:valid, _} <- validate_target(target) do
+         {:valid, target} <- validate_target(target) do
       [{key, target}]
     else
       _ -> []
@@ -77,20 +77,29 @@ defmodule AutherWeb.RedirectTarget do
   defp fetch_query_param(conn, key), do: fetch_query_param(conn, to_string(key))
 
   defp validate_target(target) do
-    with %{host: nil, scheme: nil, authority: nil, path: path} <- URI.parse(target),
-         :ok <- validate_path(path) do
-      {:valid, target}
+    with %{host: nil, scheme: nil, authority: nil, path: path} = uri <- URI.parse(target) do
+      case validate_path(path) do
+        {:valid, path} ->
+          {:valid, path}
+
+        {:sanitized, path} ->
+          uri = Map.put(uri, :path, path)
+          {:valid, URI.to_string(uri)}
+
+        :invalid ->
+          :invalid
+      end
     else
       _ -> :invalid
     end
   end
 
   defp validate_path(path) do
-    # todo maybe get something more suffisticated in here?
-    if String.contains?(path, "../") do
-      :error
-    else
-      :ok
+    cond do
+      # todo maybe get something more suffisticated in here?>
+      String.contains?(path, "../") -> :invalid
+      !String.starts_with?(path, "/") -> {:sanitized, "/" <> path}
+      true -> {:valid, path}
     end
   end
 end
