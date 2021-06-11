@@ -31,6 +31,8 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
     )
   end
 
+  # todo add explicit behaviours for when 2FA is expected to be enabled/disabled but isn't
+
   def update(conn, %{"action" => "enable", "confirmation" => confirmation}) do
     {conn, secret} = pop_secret(conn)
 
@@ -46,7 +48,10 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
           |> redirect(to: Routes.two_factor_auth_path(conn, :show))
 
         {:error, changeset} ->
-          Logger.error("Couldn't enable 2FA because of invalid changeset", changeset.errors)
+          Logger.error(
+            "Couldn't enable 2FA because of invalid changeset. changeset=#{inspect(changeset)}"
+          )
+
           conn
           |> put_flash(
             :error,
@@ -78,7 +83,9 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
         |> redirect(to: Routes.two_factor_auth_path(conn, :show))
 
       {:error, changeset} ->
-        Logger.error("Couldn't deactivate 2FA because of invalid changeset", changeset.errors)
+        Logger.error(
+          "Couldn't deactivate 2FA because of invalid changeset. changeset=#{inspect(changeset)}"
+        )
 
         conn
         |> put_flash(
@@ -106,7 +113,9 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
 
     # todo support fallback keys
     if TwoFactorAuth.valid?(secret, otp) do
-      redirect(conn, to: RedirectTarget.get(conn))
+      conn
+      |> AutherWeb.TwoFactorAuthPlug.two_factor_auth_completed()
+      |> redirect(to: RedirectTarget.get(conn))
     else
       do_render_prompt(
         conn,

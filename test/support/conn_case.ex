@@ -46,6 +46,16 @@ defmodule AutherWeb.ConnCase do
     |> AutherWeb.Session.sign_in(user)
   end
 
+  def with_tfa_completed(conn, time \\ :now) do
+    case time do
+      :now ->
+        AutherWeb.TwoFactorAuthPlug.two_factor_auth_completed(conn)
+
+      timestamp when is_integer(timestamp) ->
+        AutherWeb.TwoFactorAuthPlug.set_internal_timer(conn, timestamp)
+    end
+  end
+
   @doc """
   ## Examples
 

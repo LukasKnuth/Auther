@@ -13,6 +13,10 @@ defmodule AutherWeb.Router do
     plug AutherWeb.AuthPlug
   end
 
+  pipeline :two_factor_auth do
+    plug AutherWeb.TwoFactorAuthPlug
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -34,12 +38,17 @@ defmodule AutherWeb.Router do
   scope "/account", AutherWeb.Authorized do
     pipe_through [:browser, :auth]
 
+    get "/2fa/prompt", TwoFactorAuthController, :prompt
+    post "/2fa/prompt", TwoFactorAuthController, :verify
+  end
+
+  scope "/account", AutherWeb.Authorized do
+    pipe_through [:browser, :auth, :two_factor_auth]
+
     resources "/", AccountController, only: [:show, :edit, :update], singleton: true
 
     get "/2fa", TwoFactorAuthController, :show
     post "/2fa/update", TwoFactorAuthController, :update
-    get "/2fa/prompt", TwoFactorAuthController, :prompt
-    post "/2fa/prompt", TwoFactorAuthController, :verify
   end
 
   # Other scopes may use custom stacks.

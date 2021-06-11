@@ -11,7 +11,12 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
 
   setup %{conn: conn} do
     conn_user = with_logged_in(conn, fixture(:user))
-    conn_tfa = with_logged_in(conn, fixture(:user_with_tfa))
+
+    conn_tfa =
+      conn
+      |> with_logged_in(fixture(:user_with_tfa))
+      |> with_tfa_completed()
+
     {:ok, %{conn_tfa: conn_tfa, conn_user: conn_user}}
   end
 
