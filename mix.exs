@@ -58,7 +58,10 @@ defmodule Auther.MixProject do
       {:knigge, "~> 1.3"},
 
       # Asserting HTML elements in tests
-      {:assert_html, "~> 0.1.2"}
+      {:assert_html, "~> 0.1.2"},
+
+      # Generate fake data for tests
+      {:faker, "~> 0.16.0"}
     ]
   end
 

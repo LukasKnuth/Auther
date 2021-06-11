@@ -2,7 +2,6 @@ defmodule AutherWeb.TwoFactorAuthPlugTest do
   use AutherWeb.ConnCase
 
   alias AutherWeb.RedirectTarget
-  alias AutherWeb.Session
   alias AutherWeb.TwoFactorAuthPlug
 
   setup %{conn: conn} do
@@ -19,11 +18,11 @@ defmodule AutherWeb.TwoFactorAuthPlugTest do
       assert redirected_to(conn) == tfa_prompt_with_target(conn)
     end
 
-    test "redirects to TFA prompt and includes original route as target", %{conn_tfa: conn} do
+    test "redirects to TFA prompt and includes original route as target" do
       conn =
         :get
         |> build_conn("/some/where", hello: "world")
-        |> with_logged_in(Session.current_user!(conn))
+        |> with_logged_in(fixture(:user_with_tfa))
         |> run_plug()
 
       params = RedirectTarget.as_url_param!("/some/where?hello=world")
