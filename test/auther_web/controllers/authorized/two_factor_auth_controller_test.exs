@@ -52,7 +52,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
 
   describe "POST #update (2FA disabled)" do
     test "enables TFA, flashes and redirects if given 2FA key is valid", %{conn_user: conn} do
-      expect(TfaMock, :valid?, fn _, _ -> true end)
+      expect(TfaMock, :validate, fn _, _, _ -> {:valid, :otp} end)
 
       secret = "some-secret-here"
       conn = Plug.Conn.put_session(conn, "_auther_2fa_secret", secret)
@@ -70,7 +70,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
     end
 
     test "flashes and redirects if given 2FA key is invalid", %{conn_user: conn} do
-      expect(TfaMock, :valid?, fn _, _ -> false end)
+      expect(TfaMock, :validate, fn _, _, _ -> :invalid end)
 
       conn =
         post(conn, Routes.two_factor_auth_path(conn, :update), %{
@@ -124,7 +124,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
     test_auth_required(post: two_factor_auth_path(:verify))
 
     test "redirects to account-page if TFA is valid", %{conn_tfa: conn} do
-      expect(TfaMock, :valid?, fn _, _ -> true end)
+      expect(TfaMock, :validate, fn _, _, _ -> {:valid, :otp} end)
 
       conn = post(conn, Routes.two_factor_auth_path(conn, :verify))
 
@@ -132,7 +132,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
     end
 
     test "redirects to given target if TFA is valid", %{conn_tfa: conn} do
-      expect(TfaMock, :valid?, fn _, _ -> true end)
+      expect(TfaMock, :validate, fn _, _, _ -> {:valid, :otp} end)
 
       params = RedirectTarget.as_url_param!("/other/path")
       conn = post(conn, Routes.two_factor_auth_path(conn, :verify, params))
@@ -141,7 +141,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
     end
 
     test "re-renders form with error if TFA is invalid", %{conn_tfa: conn} do
-      expect(TfaMock, :valid?, fn _, _ -> false end)
+      expect(TfaMock, :validate, fn _, _, _ -> :invalid end)
 
       conn = post(conn, Routes.two_factor_auth_path(conn, :verify))
 

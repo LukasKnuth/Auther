@@ -36,7 +36,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
   def update(conn, %{"action" => "enable", "confirmation" => confirmation}) do
     {conn, secret} = pop_secret(conn)
 
-    if TwoFactorAuth.valid?(secret, confirmation) do
+    if otp_valid?(confirmation, secret) do
       conn
       |> Session.current_user!()
       # todo roll fallback keys
@@ -112,7 +112,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
     otp = get_in(params, ["two_factor_auth", "otp"])
 
     # todo support fallback keys
-    if TwoFactorAuth.valid?(secret, otp) do
+    if otp_valid?(otp, secret) do
       conn
       |> AutherWeb.TwoFactorAuthPlug.two_factor_auth_completed()
       |> redirect(to: RedirectTarget.get(conn))
@@ -130,6 +130,11 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
     params = RedirectTarget.query_to_url_param(conn)
 
     render(conn, :prompt, action: Routes.two_factor_auth_path(conn, :verify, params), error: error)
+  end
+
+  defp otp_valid?(otp, secret) do
+    # a temporary helper to emulate old TwoFactorAuth.valid? behaviour.
+    TwoFactorAuth.validate(otp, secret, []) == {:valid, :otp}
   end
 
   defp tfa_enabled?(%Accounts.User{two_factor_auth: tfa}) when is_nil(tfa), do: false
