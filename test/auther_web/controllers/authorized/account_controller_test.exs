@@ -17,7 +17,7 @@ defmodule AutherWeb.Authorized.AccountControllerTest do
     test "renders user information if logged in", %{logged_in_conn: conn, user: user} do
       conn = get(conn, Routes.account_path(conn, :show))
 
-      assert html_response(conn, 200) =~ user.name
+      assert html_response(conn, 200) =~ html_escape(user.name)
     end
   end
 
