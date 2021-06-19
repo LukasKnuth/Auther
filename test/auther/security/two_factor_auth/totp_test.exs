@@ -32,7 +32,7 @@ defmodule Auther.Security.TwoFactorAuth.TOTPTest do
 
     test "returns :valid and new list for fallback code from list, case-insensitive", %{secret: secret} do
       fallbacks = ["TEST-1234", "H3LL-08IJ"]
-      hashed = Enum.map(fallbacks, &TOTP.hash_fallback(&1))
+      hashed = Enum.map(fallbacks, &TOTP.hash_fallback/1)
 
       assert {:valid, {:fallback, list}} = TOTP.validate("h3lL-08iJ", secret, hashed)
       assert list == List.delete_at(hashed, 1)
@@ -50,6 +50,13 @@ defmodule Auther.Security.TwoFactorAuth.TOTPTest do
 
     test "returns :invalid for wrong OTP code and empty fallbacks", %{secret: secret} do
       assert :invalid == TOTP.validate("not valid", secret, [])
+    end
+
+    test "returns :valid and empty fallbacks if last fallback code is used", %{secret: secret} do
+      fallbacks = ["LAST-ONE1"]
+      hashed = Enum.map(fallbacks, &TOTP.hash_fallback/1)
+
+      assert {:valid, {:fallback, []}} == TOTP.validate("LAST-ONE1", secret, hashed)
     end
   end
 

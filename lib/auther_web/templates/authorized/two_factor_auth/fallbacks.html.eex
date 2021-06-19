@@ -1,0 +1,13 @@
+<h2>Two Factor Auth - Fallback keys</h2>
+<%= if get_flash(@conn, :info) != nil do %>
+  <p><b>Note:</b> <%= get_flash(@conn, :info) %></p>
+<% end %>
+
+<p>
+  Note these keys down. They're the only way to access your account if you loose access to your
+  Two Factor Authentication codes.
+</p>
+
+<pre><code><%= render_fallbacks(@fallbacks) %></code></pre>
+
+<a href="<%= @action %>">I have noted the keys, continue</a>

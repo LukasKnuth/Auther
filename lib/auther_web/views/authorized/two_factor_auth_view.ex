@@ -17,4 +17,11 @@ defmodule AutherWeb.Authorized.TwoFactorAuthView do
     opts = Keyword.merge(opts, inputmode: "numeric", autocomplete: "one-time-code")
     Form.text_input(form, field, opts)
   end
+
+  def render_fallbacks(fallbacks) do
+    fallbacks
+    |> Enum.chunk_every(5)
+    |> Enum.map(&Enum.join(&1, " | "))
+    |> Enum.join("\n")
+  end
 end
