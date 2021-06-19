@@ -7,6 +7,7 @@ defmodule Auther.Accounts do
   alias Auther.Repo
 
   alias Auther.Accounts.User
+  alias Auther.Accounts.TwoFactorAuth
 
   def get_user!(id) do
     User
@@ -43,6 +44,17 @@ defmodule Auther.Accounts do
     |> user_preload()
     |> User.changeset_for_enable_2fa(%{secret: secret, fallback: fallbacks})
     |> Repo.update()
+  end
+
+  def update_2fa_fallbacks!(%User{} = user, fallbacks) do
+    user = user_preload(user)
+
+    tfa = user.two_factor_auth
+    |> TwoFactorAuth.changeset(%{fallback: fallbacks})
+    |> Repo.update!()
+
+    # todo is this a "valid" way of doing this? Doesn't use the assoc functionalities!
+    %{user | two_factor_auth: tfa}
   end
 
   def disable_2fa(%User{} = user) do

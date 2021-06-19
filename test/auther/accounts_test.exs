@@ -204,6 +204,22 @@ defmodule Auther.AccountsTest do
     end
   end
 
+  describe "update_2fa_fallbacks!/2" do
+    test "sets fallback codes for given user and codes" do
+      user = fixture(:user_with_tfa)
+
+      updated = Accounts.update_2fa_fallbacks!(user, ["FALL-B1CK", "F0LL-B34K"])
+      assert updated.two_factor_auth.secret == user.two_factor_auth.secret
+      assert updated.two_factor_auth.fallback == ["FALL-B1CK", "F0LL-B34K"]
+    end
+
+    test "raises if given fallback code list is empty" do
+      assert_raise Ecto.InvalidChangesetError, fn ->
+        Accounts.update_2fa_fallbacks!(fixture(:user_with_tfa), [])
+      end
+    end
+  end
+
   describe "disable_2fa/1" do
     test "does nothing if no 2FA config is present" do
       user = user_fixture()
