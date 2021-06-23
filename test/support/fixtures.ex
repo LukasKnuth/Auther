@@ -6,20 +6,31 @@ defmodule Auther.Fixtures do
   @pw_hash Auther.Security.Password.Bcrypt.hash("asdf1234")
   @tfa_secret Auther.Security.TwoFactorAuth.TOTP.generate_secret()
 
-  def fixture(:user) do
-    %User{name: Faker.Person.name(), email: Faker.Internet.email(), password_hash: @pw_hash}
+  @doc """
+  Returns a valid, randomized and database-inserted fixture of the given type.
+  Optional overrides can be specified to customize the inserted/returned fixture.
+  """
+  def fixture(type, overrides \\ [])
+
+  def fixture(:user, overrides) do
+    user(overrides)
     |> Repo.insert!()
-    # pretend like 2FA is preloaded
-    |> Map.put(:two_factor_auth, nil)
   end
 
-  def fixture(:user_with_tfa) do
-    %User{
-      name: Faker.Person.name(),
-      email: Faker.Internet.email(),
-      password_hash: @pw_hash,
-      two_factor_auth: %TwoFactorAuth{secret: @tfa_secret, fallback: ["something"]}
+  def fixture(:user_with_tfa, overrides) do
+    %{
+      user(overrides)
+      | two_factor_auth: %TwoFactorAuth{secret: @tfa_secret, fallback: ["something"]}
     }
     |> Repo.insert!()
+  end
+
+  defp user(overrides) do
+    %User{
+      name: Keyword.get_lazy(overrides, :name, &Faker.Person.name/0),
+      email: Keyword.get_lazy(overrides, :email, &Faker.Internet.email/0),
+      password_hash: @pw_hash,
+      two_factor_auth: nil
+    }
   end
 end
