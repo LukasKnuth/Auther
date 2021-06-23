@@ -27,25 +27,24 @@ defmodule Auther.AccountsTest do
     :ok
   end
 
-  # todo migrate to use fixture() helper here as well
   # todo migrate to check error changesets for specific errors with DataCase.errors_on/2
 
   describe "get_user!/1" do
     test "returns the user with given id" do
-      user = user_fixture()
+      user = fixture(:user)
       assert Accounts.get_user!(user.id) == user
     end
   end
 
   describe "get_user_by/1" do
     test "returns the user for given clauses" do
-      user_fixture(email: "test@mail.com")
+      fixture(:user, email: "test@mail.com")
       assert {:ok, %User{} = user} = Accounts.get_user_by(email: "test@mail.com")
       assert user.email == "test@mail.com"
     end
 
     test "returns :error for unknown clauses" do
-      user_fixture(email: "other@mail.com")
+      fixture(:user, email: "other@mail.com")
       assert :error == Accounts.get_user_by(email: "test@mail.com")
     end
   end
@@ -82,22 +81,22 @@ defmodule Auther.AccountsTest do
 
   describe "update_user/2" do
     test "with valid data updates the user" do
-      user = user_fixture()
-      assert {:ok, %User{} = user} = Accounts.update_user(user, @update_attrs)
+      original_user = fixture(:user)
+      assert {:ok, %User{} = user} = Accounts.update_user(original_user, @update_attrs)
       assert user.email == "some_updated@email.com"
       assert user.name == "some updated name"
       # unchanged
-      assert user.password_hash == @pw_hash
+      assert user.password_hash == original_user.password_hash
     end
 
     test "with invalid data returns error changeset" do
-      user = user_fixture()
+      user = fixture(:user)
       assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, @invalid_attrs)
       assert user == Accounts.get_user!(user.id)
     end
 
     test "with password_hash doesn't change stored password_hash" do
-      user = user_fixture()
+      user = fixture(:user)
       assert {:ok, %User{} = changed_user} = Accounts.update_user(user, %{password_hash: "other"})
       assert user == changed_user
     end
@@ -105,11 +104,9 @@ defmodule Auther.AccountsTest do
     @test_pw_hash "$2b$12$hAtV1nhmVf/Ij94r/6rGJupCABIcvGK4Yv7hu3bW30KuVCJGdmsOG"
 
     test "with password and confirm_password updates the user" do
-      MockPassword
-      |> expect(:hash, fn _ -> @pw_hash end)
-      |> expect(:hash, fn _ -> @test_pw_hash end)
+      expect(MockPassword, :hash, fn _ -> @test_pw_hash end)
 
-      user = user_fixture()
+      user = fixture(:user)
 
       assert {:ok, %User{} = user} =
                Accounts.update_user(user, %{password: "test", password_confirmation: "test"})
@@ -118,7 +115,7 @@ defmodule Auther.AccountsTest do
     end
 
     test "with non-matching password and confirm_passowrd returns error changeset" do
-      user = user_fixture()
+      user = fixture(:user)
       expect(MockPassword, :hash, 0, fn _ -> "not_called_for_update" end)
 
       assert {:error, %Ecto.Changeset{}} =
@@ -128,7 +125,7 @@ defmodule Auther.AccountsTest do
     end
 
     test "without confirm_password returns error changeset" do
-      user = user_fixture()
+      user = fixture(:user)
       expect(MockPassword, :hash, 0, fn _ -> "not_called_for_update" end)
 
       assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, %{password: "test"})
@@ -136,14 +133,14 @@ defmodule Auther.AccountsTest do
     end
 
     test "converts email address to downcase" do
-      user = user_fixture()
+      user = fixture(:user)
 
       assert {:ok, %User{} = user} = Accounts.update_user(user, %{email: "TeST@SOmeWherE.dE"})
       assert user.email == "test@somewhere.de"
     end
 
     test "fails if email is invalid" do
-      user = user_fixture()
+      user = fixture(:user)
 
       assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, %{email: "noatinhere"})
     end
@@ -151,14 +148,14 @@ defmodule Auther.AccountsTest do
     test "fails if email is already taken" do
       assert {:ok, %User{}} = Accounts.create_user(%{@valid_attrs | email: "my@email"})
 
-      user = user_fixture()
+      user = fixture(:user)
       assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, %{email: "my@email"})
     end
   end
 
   describe "delete_user/1" do
     test "deletes the user" do
-      user = user_fixture()
+      user = fixture(:user)
       assert {:ok, %User{}} = Accounts.delete_user(user)
       assert_raise Ecto.NoResultsError, fn -> Accounts.get_user!(user.id) end
     end
@@ -202,7 +199,7 @@ defmodule Auther.AccountsTest do
     end
 
     test "stores the 2FA secret encrypted in the database" do
-      user = user_fixture()
+      user = fixture(:user)
 
       assert {:ok, %User{two_factor_auth: %TwoFactorAuth{} = tfa}, _fallbacks} =
                Accounts.enable_2fa(user, "secret", "otp")
@@ -244,7 +241,7 @@ defmodule Auther.AccountsTest do
 
   describe "disable_2fa/1" do
     test "does nothing if no 2FA config is present" do
-      user = user_fixture()
+      user = fixture(:user)
 
       assert {:ok, ^user} = Accounts.disable_2fa(user)
     end
@@ -316,18 +313,5 @@ defmodule Auther.AccountsTest do
 
       assert :invalid == Accounts.verify_2fa(user, "otp")
     end
-  end
-
-  defp user_fixture(attrs \\ %{}) do
-    {:ok, user} =
-      attrs
-      |> Enum.into(@valid_attrs)
-      |> Accounts.create_user()
-      |> case do
-        {:ok, user} -> {:ok, Auther.Repo.preload(user, :two_factor_auth)}
-        {:error, _} = err -> err
-      end
-
-    user
   end
 end
