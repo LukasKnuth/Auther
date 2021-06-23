@@ -8,6 +8,7 @@ defmodule Auther.AccountsTest do
   alias Auther.Repo
   alias Auther.Security.Encryption
   alias Auther.Security.Password.Mock, as: MockPassword
+  alias Auther.Security.TwoFactorAuth.Mock, as: MockTfa
 
   @pw_hash "$2b$12$rMFYMFy91qV6KTPclubTVOL9gpO55.JRWDRlaZccqsdbIXZA6O8Gi"
   @valid_attrs %{
@@ -18,6 +19,8 @@ defmodule Auther.AccountsTest do
   }
   @update_attrs %{email: "some_updated@email.com", name: "some updated name"}
   @invalid_attrs %{email: nil, name: nil, password_hash: "anything"}
+
+  setup :verify_on_exit!
 
   setup do
     stub(MockPassword, :hash, fn _ -> @pw_hash end)
@@ -161,10 +164,7 @@ defmodule Auther.AccountsTest do
     end
 
     test "deletes user and 2FA config" do
-      user = user_fixture()
-
-      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{id: tfa_id}} = user} =
-               Accounts.enable_2fa(user, "secret", ["fallback1", "fallback2"])
+      %User{two_factor_auth: %TwoFactorAuth{id: tfa_id}} = user = fixture(:user_with_tfa)
 
       assert {:ok, %User{}} = Accounts.delete_user(user)
       assert_raise Ecto.NoResultsError, fn -> Accounts.get_user!(user.id) end
@@ -173,27 +173,39 @@ defmodule Auther.AccountsTest do
   end
 
   describe "enable_2fa/3" do
-    test "creates and assosiates a valid 2FA config" do
-      user = user_fixture()
+    setup do
+      MockTfa
+      |> stub(:validate, fn "otp", "secret", [] -> {:valid, :otp} end)
+      |> stub(:generate_fallback, fn -> "FALL-BACK" end)
+      |> stub(:hash_fallback, fn "FALL-BACK" -> "this-is-hashed" end)
 
-      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{}} = user} =
-               Accounts.enable_2fa(user, "secret", ["fallback1", "fallback2"])
-
-      assert user.two_factor_auth.secret == "secret"
-      assert user.two_factor_auth.fallback == ["fallback1", "fallback2"]
+      :ok
     end
 
-    test "fails if no fallback keys are provided" do
-      user = user_fixture()
-      assert {:error, %Ecto.Changeset{}} = Accounts.enable_2fa(user, "secret", [])
-      assert user.two_factor_auth == nil
+    test "creates and assosiates 2FA config, returns fallback keys" do
+      user = fixture(:user)
+
+      MockTfa
+      |> expect(:generate_fallback, fn -> "FALL-B1CK" end)
+      |> expect(:generate_fallback, fn -> "FALL-BA2C" end)
+      |> expect(:generate_fallback, fn -> "FALL-B3AG" end)
+      |> expect(:hash_fallback, fn "FALL-B1CK" -> "hash1" end)
+      |> expect(:hash_fallback, fn "FALL-BA2C" -> "2hashed" end)
+      |> expect(:hash_fallback, fn "FALL-B3AG" -> "3hassh" end)
+
+      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{}} = user, fallbacks} =
+               Accounts.enable_2fa(user, "secret", "otp")
+
+      assert fallbacks == ["FALL-B1CK", "FALL-BA2C", "FALL-B3AG"]
+      assert user.two_factor_auth.secret == "secret"
+      assert user.two_factor_auth.fallback == ["hash1", "2hashed", "3hassh"]
     end
 
     test "stores the 2FA secret encrypted in the database" do
       user = user_fixture()
 
-      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{} = tfa}} =
-               Accounts.enable_2fa(user, "secret", ["fallback"])
+      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{} = tfa}, _fallbacks} =
+               Accounts.enable_2fa(user, "secret", "otp")
 
       assert tfa.secret == "secret"
 
@@ -205,21 +217,28 @@ defmodule Auther.AccountsTest do
       encrypted = Encryption.decrypt(raw_secret)
       assert encrypted == tfa.secret
     end
-  end
 
-  describe "update_2fa_fallbacks!/2" do
-    test "sets fallback codes for given user and codes" do
-      user = fixture(:user_with_tfa)
+    test "stores the 2FA fallbacks hashed in the database" do
+      user = fixture(:user)
 
-      updated = Accounts.update_2fa_fallbacks!(user, ["FALL-B1CK", "F0LL-B34K"])
-      assert updated.two_factor_auth.secret == user.two_factor_auth.secret
-      assert updated.two_factor_auth.fallback == ["FALL-B1CK", "F0LL-B34K"]
+      MockTfa
+      |> expect(:hash_fallback, fn "FALL-BACK" -> "hash1" end)
+      |> expect(:hash_fallback, fn "FALL-BACK" -> "2hashed" end)
+      |> expect(:hash_fallback, fn "FALL-BACK" -> "3hassh" end)
+
+      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{} = tfa}, fallbacks} =
+               Accounts.enable_2fa(user, "secret", "otp")
+
+      assert tfa.fallback != fallbacks
+      assert tfa.fallback == ["hash1", "2hashed", "3hassh"]
     end
 
-    test "raises if given fallback code list is empty" do
-      assert_raise Ecto.InvalidChangesetError, fn ->
-        Accounts.update_2fa_fallbacks!(fixture(:user_with_tfa), [])
-      end
+    test "fails if secret and otp don't match" do
+      expect(MockTfa, :validate, fn "invalid", "secret", [] -> :invalid end)
+      user = fixture(:user)
+
+      assert {:error, {:otp, :invalid}} = Accounts.enable_2fa(user, "secret", "invalid")
+      assert user.two_factor_auth == nil
     end
   end
 
@@ -231,14 +250,71 @@ defmodule Auther.AccountsTest do
     end
 
     test "deletes 2FA config if present" do
-      user = user_fixture()
-
-      assert {:ok, %User{two_factor_auth: %TwoFactorAuth{id: tfa_id}} = user} =
-               Accounts.enable_2fa(user, "secret", ["fallback"])
+      %User{two_factor_auth: %TwoFactorAuth{id: tfa_id}} = user = fixture(:user_with_tfa)
 
       assert {:ok, user} = Accounts.disable_2fa(user)
       assert user.two_factor_auth == nil
       assert Repo.get(TwoFactorAuth, tfa_id) == nil
+    end
+  end
+
+  describe "has_2fa?/1" do
+    test "returns true for user with two factor auth enabled" do
+      assert true == Accounts.has_2fa?(fixture(:user_with_tfa))
+    end
+
+    test "returns false for user without two factor auth enabled" do
+      assert false == Accounts.has_2fa?(fixture(:user))
+    end
+  end
+
+  describe "verify_2fa/2" do
+    test "returns :valid for OTP code matching secret" do
+      expect(MockTfa, :validate, fn "otp", _secret, _fallbacks -> {:valid, :otp} end)
+      user = fixture(:user_with_tfa)
+
+      assert :valid == Accounts.verify_2fa(user, "otp")
+    end
+
+    test "returns :valid for OTP matching fallback code and updates user fallbacks" do
+      expect(MockTfa, :validate, fn "otp", _secret, _fallbacks ->
+        {:valid, {:fallback, ["hash1", "hash2"]}}
+      end)
+
+      user = fixture(:user_with_tfa)
+
+      assert :valid == Accounts.verify_2fa(user, "otp")
+
+      assert %User{two_factor_auth: %TwoFactorAuth{fallback: ["hash1", "hash2"]}} =
+               Accounts.get_user!(user.id)
+    end
+
+    test "returns :valid and new fallbacks for OTP matching last fallback" do
+      MockTfa
+      |> expect(:validate, fn "otp", _secret, _fallbacks -> {:valid, {:fallback, []}} end)
+      |> expect(:generate_fallback, fn -> "F3L1-B3CK" end)
+      |> expect(:generate_fallback, fn -> "AN0T-3R1N" end)
+      |> expect(:generate_fallback, fn -> "M0AR-K3Y2" end)
+      |> expect(:hash_fallback, fn "F3L1-B3CK" -> "hash1" end)
+      |> expect(:hash_fallback, fn "AN0T-3R1N" -> "hash2" end)
+      |> expect(:hash_fallback, fn "M0AR-K3Y2" -> "hash3" end)
+
+      user = fixture(:user_with_tfa)
+
+      assert {:valid, {:fallback, new_fallbacks}} = Accounts.verify_2fa(user, "otp")
+      assert new_fallbacks == ["F3L1-B3CK", "AN0T-3R1N", "M0AR-K3Y2"]
+
+      %User{two_factor_auth: %TwoFactorAuth{fallback: hashed_fallbacks}} =
+        Accounts.get_user!(user.id)
+
+      assert hashed_fallbacks == ["hash1", "hash2", "hash3"]
+    end
+
+    test "returns :invalid for non-matching OTP secret and non-matching fallbacks" do
+      expect(MockTfa, :validate, fn "otp", _secret, _fallback -> :invalid end)
+      user = fixture(:user_with_tfa)
+
+      assert :invalid == Accounts.verify_2fa(user, "otp")
     end
   end
 

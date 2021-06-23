@@ -8,6 +8,9 @@ defmodule Auther.Accounts do
 
   alias Auther.Accounts.User
   alias Auther.Accounts.TwoFactorAuth
+  alias Auther.Security
+
+  @fallback_count Application.compile_env!(:auther, [__MODULE__, :fallback_count])
 
   def get_user!(id) do
     User
@@ -38,25 +41,22 @@ defmodule Auther.Accounts do
     Repo.delete(user)
   end
 
-  @spec enable_2fa(%User{}, String.t(), [String.t()]) :: User.t()
-  def enable_2fa(%User{} = user, secret, fallbacks) do
-    # todo move business logic for generate/hash/return in here.
-    user
-    |> user_preload()
-    |> User.changeset_for_enable_2fa(%{secret: secret, fallback: fallbacks})
-    |> Repo.update()
-  end
+  @spec enable_2fa(%User{}, String.t(), String.t()) ::
+          {:ok, %User{}, [String.t()]} | {:error, {:otp, :invalid}}
+  def enable_2fa(%User{} = user, secret, confirmation) do
+    if Security.TwoFactorAuth.validate(confirmation, secret, []) == {:valid, :otp} do
+      {fallbacks_plain, fallbacks_hashed} = roll_fallbacks()
 
-  def update_2fa_fallbacks!(%User{} = user, fallbacks) do
-    user = user_preload(user)
+      user =
+        user
+        |> user_preload()
+        |> User.changeset_for_enable_2fa(%{secret: secret, fallback: fallbacks_hashed})
+        |> Repo.update!()
 
-    tfa =
-      user.two_factor_auth
-      |> TwoFactorAuth.changeset(%{fallback: fallbacks})
-      |> Repo.update!()
-
-    # todo is this a "valid" way of doing this? Doesn't use the assoc functionalities!
-    %{user | two_factor_auth: tfa}
+      {:ok, user, fallbacks_plain}
+    else
+      {:error, {:otp, :invalid}}
+    end
   end
 
   def disable_2fa(%User{} = user) do
@@ -66,5 +66,52 @@ defmodule Auther.Accounts do
     |> Repo.update()
   end
 
+  def has_2fa?(%User{} = user) do
+    user
+    |> user_preload()
+    |> case do
+      %User{two_factor_auth: tfa} when is_nil(tfa) -> false
+      %User{two_factor_auth: %TwoFactorAuth{}} -> true
+    end
+  end
+
+  @spec verify_2fa(%User{}, String.t()) :: :invalid | :valid | {:valid, {:fallback, [String.t()]}}
+  def verify_2fa(%User{} = user, otp_code) do
+    user = user_preload(user)
+    %User{two_factor_auth: %TwoFactorAuth{secret: secret, fallback: fallback}} = user
+
+    case Security.TwoFactorAuth.validate(otp_code, secret, fallback) do
+      :invalid ->
+        :invalid
+
+      {:valid, :otp} ->
+        :valid
+
+      {:valid, {:fallback, []}} ->
+        {plain, hashed} = roll_fallbacks()
+        update_2fa_fallbacks!(user, hashed)
+        {:valid, {:fallback, plain}}
+
+      {:valid, {:fallback, new_fallbacks}} ->
+        update_2fa_fallbacks!(user, new_fallbacks)
+        :valid
+    end
+  end
+
+  defp update_2fa_fallbacks!(%User{two_factor_auth: %TwoFactorAuth{}} = user, fallbacks) do
+    user.two_factor_auth
+    |> TwoFactorAuth.changeset(%{fallback: fallbacks})
+    |> Repo.update!()
+
+    :ok
+  end
+
+  defp roll_fallbacks do
+    plain = for _ <- 1..@fallback_count, do: Security.TwoFactorAuth.generate_fallback()
+    hashed = Enum.map(plain, &Security.TwoFactorAuth.hash_fallback/1)
+    {plain, hashed}
+  end
+
+  # todo is OK to _always_ preload this to make sure it's there? Should be no-op...
   defp user_preload(%User{} = user), do: Repo.preload(user, :two_factor_auth)
 end

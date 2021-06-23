@@ -28,6 +28,9 @@ config :phoenix, :json_library, Jason
 # Set bcrypt rounds for secure passwords
 config :bcrypt_elixir, log_rounds: 12
 
+# Fallback Key count for testing
+config :auther, Auther.Accounts, fallback_count: 20
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "compiletime/#{config_env()}.exs"

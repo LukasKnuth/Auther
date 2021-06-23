@@ -54,8 +54,8 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
     test "enables TFA and renders fallback keys if given 2FA key is valid", %{conn_user: conn} do
       TfaMock
       |> expect(:validate, fn "980421", _, _ -> {:valid, :otp} end)
-      |> expect(:generate_fallback, 20, fn -> "NOTA-FBKY" end)
-      |> expect(:hash_fallback, 20, fn "NOTA-FBKY" -> "dis-be-a-hash" end)
+      |> expect(:generate_fallback, 3, fn -> "NOTA-FBKY" end)
+      |> expect(:hash_fallback, 3, fn "NOTA-FBKY" -> "dis-be-a-hash" end)
 
       secret = "some-secret-here"
       conn = Plug.Conn.put_session(conn, "_auther_2fa_secret", secret)
@@ -174,8 +174,8 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
     } do
       TfaMock
       |> expect(:validate, fn "FALL-BACK", _, _ -> {:valid, {:fallback, []}} end)
-      |> expect(:generate_fallback, 20, fn -> "NEWF-BKY1" end)
-      |> expect(:hash_fallback, 20, fn "NEWF-BKY1" -> "hashy-mc-hashl" end)
+      |> expect(:generate_fallback, 3, fn -> "NEWF-BKY1" end)
+      |> expect(:hash_fallback, 3, fn "NEWF-BKY1" -> "hashy-mc-hashl" end)
 
       params = RedirectTarget.as_url_param!("/other/path")
 
