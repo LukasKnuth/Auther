@@ -40,6 +40,7 @@ defmodule Auther.Accounts do
 
   @spec enable_2fa(%User{}, String.t(), [String.t()]) :: User.t()
   def enable_2fa(%User{} = user, secret, fallbacks) do
+    # todo move business logic for generate/hash/return in here.
     user
     |> user_preload()
     |> User.changeset_for_enable_2fa(%{secret: secret, fallback: fallbacks})
@@ -49,9 +50,10 @@ defmodule Auther.Accounts do
   def update_2fa_fallbacks!(%User{} = user, fallbacks) do
     user = user_preload(user)
 
-    tfa = user.two_factor_auth
-    |> TwoFactorAuth.changeset(%{fallback: fallbacks})
-    |> Repo.update!()
+    tfa =
+      user.two_factor_auth
+      |> TwoFactorAuth.changeset(%{fallback: fallbacks})
+      |> Repo.update!()
 
     # todo is this a "valid" way of doing this? Doesn't use the assoc functionalities!
     %{user | two_factor_auth: tfa}

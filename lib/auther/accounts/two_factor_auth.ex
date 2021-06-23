@@ -9,6 +9,7 @@ defmodule Auther.Accounts.TwoFactorAuth do
     belongs_to :user, User
     field :secret, EncryptedType
     field :fallback, {:array, :string}
+    # todo add "aggressiveness" config + form entry!
 
     timestamps()
   end

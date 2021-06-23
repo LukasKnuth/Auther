@@ -24,6 +24,9 @@ defmodule Auther.AccountsTest do
     :ok
   end
 
+  # todo migrate to use fixture() helper here as well
+  # todo migrate to check error changesets for specific errors with DataCase.errors_on/2
+
   describe "get_user!/1" do
     test "returns the user with given id" do
       user = user_fixture()

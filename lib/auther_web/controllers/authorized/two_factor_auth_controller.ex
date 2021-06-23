@@ -46,7 +46,10 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
         {:ok, _user} ->
           conn
           |> put_flash(:info, gettext("Two Factor Auth enabled successfully!"))
-          |> render(:fallbacks, fallbacks: fallbacks, action: Routes.two_factor_auth_path(conn, :show))
+          |> render(:fallbacks,
+            fallbacks: fallbacks,
+            action: Routes.two_factor_auth_path(conn, :show)
+          )
 
         {:error, changeset} ->
           Logger.error(
@@ -114,11 +117,17 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
     otp = get_in(params, ["two_factor_auth", "otp"])
 
     case TwoFactorAuth.validate(otp, secret, fallbacks) do
-      :invalid -> do_render_prompt(
+      :invalid ->
+        do_render_prompt(
           conn,
-          gettext("One-time password wasn't valid. Make sure the system clock on your device is up-to-date.")
+          gettext(
+            "One-time password wasn't valid. Make sure the system clock on your device is up-to-date."
+          )
         )
-      {:valid, :otp} -> do_prompt_success(conn)
+
+      {:valid, :otp} ->
+        do_prompt_success(conn)
+
       {:valid, {:fallback, []}} ->
         fallbacks = roll_fallbacks()
 
@@ -129,6 +138,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
         conn
         |> put_flash(:info, gettext("Last Fallback key used. New ones have been generated."))
         |> render(:fallbacks, fallbacks: fallbacks, action: RedirectTarget.get(conn))
+
       {:valid, {:fallback, new_fallbacks}} ->
         conn
         |> Session.current_user!()

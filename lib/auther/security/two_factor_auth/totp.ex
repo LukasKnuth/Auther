@@ -31,6 +31,7 @@ defmodule Auther.Security.TwoFactorAuth.TOTP do
   @impl true
   def validate(otp, secret, fallbacks) do
     secret = decode_secret(secret)
+
     if NimbleTOTP.valid?(secret, otp) do
       {:valid, :otp}
     else

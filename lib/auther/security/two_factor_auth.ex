@@ -18,7 +18,8 @@ defmodule Auther.Security.TwoFactorAuth do
   @callback generate_secret() :: pre_shared_secret()
 
   @doc "Checks if the given one-time password is valid for the pre-shared secret"
-  @callback validate(one_time_password(), pre_shared_secret(), list(hashed_fallback_code())) :: validate_response()
+  @callback validate(one_time_password(), pre_shared_secret(), list(hashed_fallback_code())) ::
+              validate_response()
 
   @doc "Creates a otpauth:// schema URI for easy setup via QRCodes"
   @callback otpauth_uri(pre_shared_secret(), User.t()) :: otpauth_uri()

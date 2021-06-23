@@ -61,6 +61,7 @@ defmodule AutherWeb.TwoFactorAuthPlug do
 
   defp require_prompt?(conn) do
     case Conn.get_session(conn, @session_key) do
+      # todo make variabel!
       timestamp when is_integer(timestamp) -> now() - timestamp > 30
       nil -> true
     end

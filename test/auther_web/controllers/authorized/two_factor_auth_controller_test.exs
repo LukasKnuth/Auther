@@ -68,6 +68,7 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
         })
 
       link = Routes.two_factor_auth_path(conn, :show)
+
       response(conn, 200)
       |> assert_html("pre code", match: "NOTA-FBKY")
       |> assert_html("a[href='#{link}']", count: 1)
@@ -133,7 +134,10 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
     test "redirects to account-page if TFA is valid", %{conn_tfa: conn} do
       expect(TfaMock, :validate, fn "748902", _, _ -> {:valid, :otp} end)
 
-      conn = post(conn, Routes.two_factor_auth_path(conn, :verify), %{two_factor_auth: %{otp: "748902"}})
+      conn =
+        post(conn, Routes.two_factor_auth_path(conn, :verify), %{
+          two_factor_auth: %{otp: "748902"}
+        })
 
       assert redirected_to(conn) == Routes.account_path(conn, :show)
     end
@@ -142,7 +146,11 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
       expect(TfaMock, :validate, fn "874912", _, _ -> {:valid, :otp} end)
 
       params = RedirectTarget.as_url_param!("/other/path")
-      conn = post(conn, Routes.two_factor_auth_path(conn, :verify, params), %{two_factor_auth: %{otp: "874912"}})
+
+      conn =
+        post(conn, Routes.two_factor_auth_path(conn, :verify, params), %{
+          two_factor_auth: %{otp: "874912"}
+        })
 
       assert redirected_to(conn) == "/other/path"
     end
@@ -152,19 +160,29 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
       expect(TfaMock, :validate, fn "FBA1-C0D3", _, _ -> {:valid, {:fallback, fallbacks}} end)
 
       params = RedirectTarget.as_url_param!("/nother/route")
-      conn = post(conn, Routes.two_factor_auth_path(conn, :verify, params), %{two_factor_auth: %{otp: "FBA1-C0D3"}})
+
+      conn =
+        post(conn, Routes.two_factor_auth_path(conn, :verify, params), %{
+          two_factor_auth: %{otp: "FBA1-C0D3"}
+        })
 
       assert redirected_to(conn) == "/nother/route"
     end
 
-    test "renders new fallback codes and button to target if last fallback is given", %{conn_tfa: conn} do
+    test "renders new fallback codes and button to target if last fallback is given", %{
+      conn_tfa: conn
+    } do
       TfaMock
       |> expect(:validate, fn "FALL-BACK", _, _ -> {:valid, {:fallback, []}} end)
       |> expect(:generate_fallback, 20, fn -> "NEWF-BKY1" end)
       |> expect(:hash_fallback, 20, fn "NEWF-BKY1" -> "hashy-mc-hashl" end)
 
       params = RedirectTarget.as_url_param!("/other/path")
-      conn = post(conn, Routes.two_factor_auth_path(conn, :verify, params), %{two_factor_auth: %{otp: "FALL-BACK"}})
+
+      conn =
+        post(conn, Routes.two_factor_auth_path(conn, :verify, params), %{
+          two_factor_auth: %{otp: "FALL-BACK"}
+        })
 
       html_response(conn, 200)
       |> assert_html("pre code", match: "NEWF-BKY1")
@@ -174,7 +192,10 @@ defmodule AutherWeb.Authorized.TwoFactorAuthControllerTest do
     test "re-renders form with error if TFA is invalid", %{conn_tfa: conn} do
       expect(TfaMock, :validate, fn "invalid", _, _ -> :invalid end)
 
-      conn = post(conn, Routes.two_factor_auth_path(conn, :verify), %{two_factor_auth: %{otp: "invalid"}})
+      conn =
+        post(conn, Routes.two_factor_auth_path(conn, :verify), %{
+          two_factor_auth: %{otp: "invalid"}
+        })
 
       html_response(conn, 200)
       |> assert_html("p.error")
