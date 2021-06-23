@@ -55,20 +55,6 @@ defmodule AutherWeb.Authorized.TwoFactorAuthController do
           gettext("Secret and OTP token didn't match. Generated new secret, try again.")
         )
         |> redirect(to: Routes.two_factor_auth_path(conn, :show))
-
-      {:error, {:changeset, changeset}} ->
-        Logger.error(
-          "Couldn't enable 2FA because of invalid changeset. changeset=#{inspect(changeset)}"
-        )
-
-        conn
-        |> put_flash(
-          :error,
-          gettext(
-            "Couldn't enable Two Factor Auth because of internal problems. Try again later..."
-          )
-        )
-        |> redirect(to: Routes.two_factor_auth_path(conn, :show))
     end
   end
 
