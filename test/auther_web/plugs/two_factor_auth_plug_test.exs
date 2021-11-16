@@ -18,6 +18,15 @@ defmodule AutherWeb.TwoFactorAuthPlugTest do
       assert redirected_to(conn) == tfa_prompt_with_target(conn)
     end
 
+    test "setting intrussiveness to :required still prompts after fresh login", %{conn: conn} do
+      conn = conn
+        |> with_logged_in(fixture(:user_with_tfa, intrusiveness: :required))
+        |> run_plug()
+
+      assert conn.halted
+      assert redirected_to(conn) == tfa_prompt_with_target(conn)
+    end
+
     test "redirects to TFA prompt and includes original route as target" do
       conn =
         :get
@@ -39,6 +48,15 @@ defmodule AutherWeb.TwoFactorAuthPlugTest do
 
       assert conn.halted
       assert redirected_to(conn) == tfa_prompt_with_target(conn)
+    end
+
+    test "setting intrussiveness to :required doesn't re-prompt after time", %{conn: conn} do
+      conn = conn
+        |> with_logged_in(fixture(:user_with_tfa, intrusiveness: :required))
+        |> with_tfa_completed(0)
+        |> run_plug()
+
+      refute conn.halted
     end
 
     test "continues if user was prompted recently", %{conn_tfa: conn} do
@@ -74,8 +92,8 @@ defmodule AutherWeb.TwoFactorAuthPlugTest do
     end
   end
 
-  defp run_plug(conn) do
-    TwoFactorAuthPlug.call(conn, TwoFactorAuthPlug.init([]))
+  defp run_plug(conn, options \\ []) do
+    TwoFactorAuthPlug.call(conn, TwoFactorAuthPlug.init(options))
   end
 
   defp tfa_prompt_with_target(conn) do

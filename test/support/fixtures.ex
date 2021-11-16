@@ -20,7 +20,11 @@ defmodule Auther.Fixtures do
   def fixture(:user_with_tfa, overrides) do
     %{
       user(overrides)
-      | two_factor_auth: %TwoFactorAuth{secret: @tfa_secret, fallback: ["something"]}
+      | two_factor_auth: %TwoFactorAuth{
+        secret: @tfa_secret,
+        fallback: ["something"],
+        intrusiveness: Keyword.get(overrides, :intrusiveness, :balanced)
+      }
     }
     |> Repo.insert!()
   end

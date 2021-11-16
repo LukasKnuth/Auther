@@ -25,21 +25,25 @@ defmodule AutherWeb.TwoFactorAuthPlug do
   # No TFA configured, do nothing.
   defp tfa_reply(%User{two_factor_auth: nil}, conn), do: conn
 
-  defp tfa_reply(%User{two_factor_auth: %TwoFactorAuth{}}, conn) do
-    if require_prompt?(conn) do
-      conn
-      |> redirect(
-        to:
-          Routes.two_factor_auth_path(
-            conn,
-            :prompt,
-            RedirectTarget.from_original_request!(conn)
-          )
-      )
-      |> halt()
+  defp tfa_reply(%User{two_factor_auth: %TwoFactorAuth{} = tfa}, conn) do
+    if require_prompt?(conn, tfa) do
+      do_redirect(conn)
     else
       reset_timer(conn)
     end
+  end
+
+  defp do_redirect(conn) do
+    conn
+    |> redirect(
+      to:
+        Routes.two_factor_auth_path(
+          conn,
+          :prompt,
+          RedirectTarget.from_original_request!(conn)
+        )
+    )
+    |> halt()
   end
 
   @doc """
@@ -59,12 +63,27 @@ defmodule AutherWeb.TwoFactorAuthPlug do
 
   defp reset_timer(conn), do: set_internal_timer(conn, now())
 
-  defp require_prompt?(conn) do
+  defp require_prompt?(conn, %TwoFactorAuth{intrusiveness: intrussive}) do
     case Conn.get_session(conn, @session_key) do
-      # todo make variabel!
-      timestamp when is_integer(timestamp) -> now() - timestamp > 30
+      timestamp when is_integer(timestamp) -> do_require_prompt?(intrussive, now() - timestamp)
       nil -> true
     end
+  end
+
+  defp do_require_prompt?(:aggressive, seconds_ellapsed) do
+    # 5min
+    seconds_ellapsed > 5 * 60
+  end
+
+  defp do_require_prompt?(:balanced, seconds_ellapsed) do
+    # 2h
+    seconds_ellapsed > 2 * 60 * 60
+  end
+
+  defp do_require_prompt?(:required, _seconds_ellapsed) do
+    # This will result in never querying for TFA because of time; only when the
+    # `force: true` option is passed at Plug initialization.
+    false
   end
 
   @spec now() :: integer()

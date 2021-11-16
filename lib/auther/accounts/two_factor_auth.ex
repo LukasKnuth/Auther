@@ -9,7 +9,10 @@ defmodule Auther.Accounts.TwoFactorAuth do
     belongs_to :user, User
     field :secret, EncryptedType
     field :fallback, {:array, :string}
-    # todo add "aggressiveness" config + form entry!
+
+    field :intrusiveness, Ecto.Enum,
+      values: [:aggressive, :balanced, :required],
+      default: :balanced
 
     timestamps()
   end
