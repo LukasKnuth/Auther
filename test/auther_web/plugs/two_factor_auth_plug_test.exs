@@ -2,6 +2,7 @@ defmodule AutherWeb.TwoFactorAuthPlugTest do
   use AutherWeb.ConnCase
 
   alias AutherWeb.RedirectTarget
+  alias AutherWeb.Session
   alias AutherWeb.TwoFactorAuthPlug
 
   setup %{conn: conn} do
@@ -48,6 +49,37 @@ defmodule AutherWeb.TwoFactorAuthPlugTest do
 
       assert conn.halted
       assert redirected_to(conn) == tfa_prompt_with_target(conn)
+    end
+
+    test "always redirects to TFA prompt if Plug is initialized with force-option", %{
+      conn_tfa: conn
+    } do
+      conn =
+        conn
+        |> with_tfa_completed()
+        |> run_plug(force: true)
+
+      assert conn.halted
+      assert redirected_to(conn) == tfa_prompt_with_target(conn)
+    end
+
+    test "continues after prompt when Plug is instantiated with force-option", %{conn_tfa: conn} do
+      # This is to verify that forcing 2FA prompt doesn't do so again on the actual request following the prompt.
+      user = Session.current_user!(conn)
+
+      conn = run_plug(conn, force: true)
+      assert conn.halted
+      assert redirected_to(conn) == tfa_prompt_with_target(conn)
+
+      retained_session = Plug.Conn.get_session(conn)
+      conn =
+        conn
+        |> recycle()
+        |> with_logged_in(user)
+        # todo workaround to restore the session. init_test_session/2 (called in with_logged_in/2) clears session state!
+        |> init_test_session(retained_session)
+        |> run_plug(force: true)
+      refute conn.halted
     end
 
     test "setting intrussiveness to :required doesn't re-prompt after time", %{conn: conn} do

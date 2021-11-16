@@ -10,22 +10,41 @@ defmodule AutherWeb.TwoFactorAuthPlug do
 
   @behaviour Plug
 
-  @session_key "_auther_tfa_timestamp"
+  @session_key_time "_auther_tfa_timestamp"
+  @session_key_forced "_auther_tfa_clear_next_forced"
 
   @impl Plug
+  @doc """
+  When 'force: true' is set, always prompt for 2FA code. This is meant for destructive routes which want to use the
+   2FA code as a security confirmation mechanism.
+  """
+  def init(force: true), do: [force: true]
+
   def init(_opts), do: []
 
   @impl Plug
-  def call(conn, _opts) do
+  def call(conn, options) do
     conn
     |> Session.current_user!()
-    |> tfa_reply(conn)
+    |> tfa_reply(force_tfa?(options), conn)
   end
 
   # No TFA configured, do nothing.
-  defp tfa_reply(%User{two_factor_auth: nil}, conn), do: conn
+  defp tfa_reply(%User{two_factor_auth: nil}, _forced, conn), do: conn
 
-  defp tfa_reply(%User{two_factor_auth: %TwoFactorAuth{} = tfa}, conn) do
+  defp tfa_reply(%User{two_factor_auth: %TwoFactorAuth{}}, true, conn) do
+    case Conn.get_session(conn, @session_key_forced) do
+      true ->
+        Conn.delete_session(conn, @session_key_forced)
+
+      val when val in [false, nil] ->
+        conn
+        |> Conn.put_session(@session_key_forced, true)
+        |> do_redirect()
+    end
+  end
+
+  defp tfa_reply(%User{two_factor_auth: %TwoFactorAuth{} = tfa}, _forced, conn) do
     if require_prompt?(conn, tfa) do
       do_redirect(conn)
     else
@@ -58,13 +77,13 @@ defmodule AutherWeb.TwoFactorAuthPlug do
   """
   @spec set_internal_timer(Conn.t(), integer()) :: Conn.t()
   def set_internal_timer(conn, time) when is_integer(time) do
-    Conn.put_session(conn, @session_key, time)
+    Conn.put_session(conn, @session_key_time, time)
   end
 
   defp reset_timer(conn), do: set_internal_timer(conn, now())
 
   defp require_prompt?(conn, %TwoFactorAuth{intrusiveness: intrussive}) do
-    case Conn.get_session(conn, @session_key) do
+    case Conn.get_session(conn, @session_key_time) do
       timestamp when is_integer(timestamp) -> do_require_prompt?(intrussive, now() - timestamp)
       nil -> true
     end
@@ -88,4 +107,6 @@ defmodule AutherWeb.TwoFactorAuthPlug do
 
   @spec now() :: integer()
   defp now, do: System.system_time(:second)
+
+  defp force_tfa?(options), do: Keyword.get(options, :force, false)
 end
